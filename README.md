@@ -1,7 +1,7 @@
 # beans-pesto
 
 **Tail Mates** — a mobile-first web app for finding dog walking buddies, parks and groups.
-Built with React + Vite (plain JavaScript).
+Built with React + Vite.
 
 ## Getting started
 
@@ -36,8 +36,7 @@ The app asks for the closest places within 3 km of the user and shows the neares
 each, since the council's API returns at most 100 records per request. Those limits are
 constants at the top of `src/data/brisbaneOpenData.js`.
 
-The map itself is [Leaflet](https://leafletjs.com/) with OpenStreetMap tiles — also free
-and key-free. Locating the user needs an `https://` address in production (`localhost`
+The map itself is [Leaflet](https://leafletjs.com/) with OpenStreetMap tiles. Locating the user needs an `https://` address in production (`localhost`
 works while developing); if location is unavailable the map falls back to the city centre.
 
 Dogs out walking are still placeholder data in `mockData.js`.
