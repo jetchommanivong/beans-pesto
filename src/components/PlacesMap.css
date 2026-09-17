@@ -1,0 +1,49 @@
+/* Fills the rounded box in MapPage. Absolute rather than height:100%, because a
+   percentage height can't resolve against a flex item and the map collapses to nothing. */
+.places-map {
+  position: absolute;
+  inset: 0;
+  background: var(--color-surface-muted);
+  font: inherit;
+}
+
+/* Leaflet's own attribution strip */
+.places-map .leaflet-control-attribution {
+  background: rgb(255 255 255 / 80%);
+  font-size: 0.65rem;
+}
+
+.map-pin-wrapper {
+  background: none;
+  border: 0;
+}
+
+/* A round pin rotated 45° so its bottom-left corner becomes a point */
+.map-pin {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: var(--tone-fg);
+  border: 2px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  box-shadow: 0 2px 6px rgb(43 42 40 / 35%);
+  color: #fff;
+  transform: rotate(-45deg);
+  transform-origin: center;
+  transition: transform 0.15s ease;
+}
+
+.map-pin svg {
+  transform: rotate(45deg);
+}
+
+.map-pin--selected {
+  transform: rotate(-45deg) scale(1.3);
+  border-color: var(--color-text);
+}
+
+.leaflet-marker-icon:focus-visible .map-pin {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}

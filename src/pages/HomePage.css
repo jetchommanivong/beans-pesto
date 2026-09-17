@@ -1,0 +1,15 @@
+.home-intro {
+  margin: 4px 0 16px;
+}
+
+.home-intro__eyebrow {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.home-intro__title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+}

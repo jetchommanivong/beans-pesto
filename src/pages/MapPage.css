@@ -1,0 +1,167 @@
+.map-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---------- Search + filters ---------- */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+}
+
+.search:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-soft);
+}
+
+.search__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 1rem; /* 16px stops iPhones zooming in on focus */
+}
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 16px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 999px;
+  color: var(--color-text-muted);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+/* ---------- Map ---------- */
+.map {
+  position: relative;
+  flex: 1;
+  min-height: 280px;
+  overflow: hidden;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.map-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+  margin-top: -4px;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.map-status__retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.map-credit {
+  margin-top: -2px;
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.map-credit a {
+  color: inherit;
+}
+
+/* ---------- Selected place ---------- */
+.place-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  color: inherit;
+  text-decoration: none;
+}
+
+.place-card--empty {
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.place-card__icon,
+.place-card__arrow {
+  display: grid;
+  flex: none;
+  place-items: center;
+}
+
+.place-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+}
+
+.place-card__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.place-card__name {
+  font-weight: 800;
+}
+
+.place-card__detail {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-card__arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--tone-fg);
+  color: #fff;
+}

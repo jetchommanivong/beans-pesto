@@ -1,0 +1,111 @@
+.social-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  padding: 4px;
+  background: var(--color-surface-muted);
+  border-radius: 999px;
+}
+
+.tabs__tab {
+  min-height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tabs__tab[aria-selected='true'] {
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-primary);
+}
+
+/* ---------- Sections ---------- */
+.social-section + .social-section {
+  margin-top: 24px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.section-heading__title {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.section-heading__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 4px;
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* ---------- People to follow (swipe sideways) ---------- */
+.people-row {
+  display: flex;
+  gap: 12px;
+  margin: 0 -16px;
+  padding: 2px 16px 8px;
+  overflow-x: auto;
+  scroll-padding-inline: 16px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.people-row::-webkit-scrollbar {
+  display: none;
+}
+
+.person-card {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 148px;
+  padding: 16px 12px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  scroll-snap-align: start;
+  text-align: center;
+}
+
+.person-card__name {
+  width: 100%;
+  margin-top: 6px;
+  overflow: hidden;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.person-card__dog {
+  margin-bottom: 8px;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.person-card .button {
+  width: 100%;
+}

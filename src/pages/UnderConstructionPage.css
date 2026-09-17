@@ -1,0 +1,40 @@
+.construction {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.construction__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.construction__title svg {
+  color: var(--color-accent);
+}
+
+.construction__art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.construction__message {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.construction__hint {
+  color: var(--color-text-muted);
+}

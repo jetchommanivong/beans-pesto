@@ -1,0 +1,12 @@
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--avatar-size);
+  height: var(--avatar-size);
+  border-radius: 999px;
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+  font-size: calc(var(--avatar-size) * 0.36);
+  font-weight: 800;
+}

@@ -1,0 +1,29 @@
+/* Phone-sized column that stays centred on bigger screens */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--app-max-width);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--color-bg);
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px calc(var(--nav-height) + 20px + env(safe-area-inset-bottom));
+}
+
+.app-shell--no-nav .app-main {
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 520px) {
+  .app-shell {
+    box-shadow:
+      0 0 0 1px var(--color-border),
+      0 10px 40px rgb(43 42 40 / 8%);
+  }
+}

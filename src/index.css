@@ -1,0 +1,169 @@
+/* ---------- Design tokens ---------- */
+:root {
+  --color-bg: #fbf7f0;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1ebe0;
+  --color-border: #e6ddcf;
+  --color-text: #2b2a28;
+  --color-text-muted: #6f6a62;
+
+  --color-primary: #2f6b4f;
+  --color-primary-strong: #245740;
+  --color-primary-soft: #dcebe2;
+  --color-accent: #a95b16;
+  --color-accent-soft: #fde9d6;
+  --color-water: #2f6f9f;
+  --color-water-soft: #dbeaf5;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow-card: 0 1px 2px rgb(43 42 40 / 6%), 0 4px 12px rgb(43 42 40 / 6%);
+
+  --header-height: 56px;
+  --nav-height: 64px;
+  --app-max-width: 480px;
+
+  color-scheme: light;
+  font-family: 'Nunito', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.4;
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+dl,
+dd {
+  margin: 0;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Colour tones (used by cards, avatars, map pins) ---------- */
+.tone-primary {
+  --tone-bg: var(--color-primary-soft);
+  --tone-fg: var(--color-primary);
+}
+
+.tone-accent {
+  --tone-bg: var(--color-accent-soft);
+  --tone-fg: var(--color-accent);
+}
+
+.tone-water {
+  --tone-bg: var(--color-water-soft);
+  --tone-fg: var(--color-water);
+}
+
+/* ---------- Shared utilities ---------- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.button:active {
+  transform: scale(0.97);
+}
+
+.button--primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.button--secondary {
+  background: var(--color-surface);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.button--small {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 0.85rem;
+}
+
+@media (hover: hover) {
+  .button--primary:hover {
+    background: var(--color-primary-strong);
+  }
+
+  .button--secondary:hover {
+    background: var(--color-primary-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
