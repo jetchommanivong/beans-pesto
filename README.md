@@ -1,6 +1,6 @@
 # beans-pesto
 
-**Tail Mates** — a mobile-first web app for finding dog walking buddies, parks and groups.
+**Tail Mates** - a mobile-first web app for finding dog walking buddies, parks and groups.
 Built with React + Vite.
 
 ## Getting started
@@ -26,7 +26,7 @@ Open the URL Vite prints (usually http://localhost:5173). To try it on your phon
 ## Where the map data comes from
 
 Parks and water taps are live from
-[Brisbane City Council open data](https://data.brisbane.qld.gov.au/explore/) — no API key
+[Brisbane City Council open data](https://data.brisbane.qld.gov.au/explore/) - no API key
 or account needed, and the council allows requests straight from the browser:
 
 - [Dog off-leash areas](https://data.brisbane.qld.gov.au/explore/dataset/park-dog-off-leash-areas/) (172 across Brisbane)
