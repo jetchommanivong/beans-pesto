@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { ArrowRight, Droplet, PawPrint, Search, TreePine } from 'lucide-react'
+import { ArrowRight, Crosshair, Droplet, PawPrint, Search, TreePine } from 'lucide-react'
 import PlacesMap from '../components/PlacesMap.jsx'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
 import useUserLocation from '../hooks/useUserLocation.js'
@@ -24,13 +24,21 @@ function getFilter(type) {
 export default function MapPage() {
   const [searchParams] = useSearchParams()
   const startingFilter = searchParams.get('filter')
+  // Home links to a specific place, e.g. "/map?filter=parks&place=dog-park-42".
+  const startingPlaceId = searchParams.get('place')
 
-  // The key resets the map's filters when the link changes, e.g. from "/map?filter=dogs" to "/map".
-  return <MapScreen key={startingFilter ?? 'all'} startingFilter={startingFilter} />
+  // The key resets the map when the link changes, e.g. "/map?filter=dogs" to "/map".
+  return (
+    <MapScreen
+      key={`${startingFilter ?? 'all'}-${startingPlaceId ?? ''}`}
+      startingFilter={startingFilter}
+      startingPlaceId={startingPlaceId}
+    />
+  )
 }
 
-function MapScreen({ startingFilter }) {
-  const { location, status: locationStatus } = useUserLocation()
+function MapScreen({ startingFilter, startingPlaceId }) {
+  const { location, status: locationStatus, isPrecise, requestLocation } = useUserLocation()
   const {
     places: councilPlaces,
     status: dataStatus,
@@ -41,7 +49,7 @@ function MapScreen({ startingFilter }) {
     FILTER_IDS.includes(startingFilter) ? [startingFilter] : FILTER_IDS,
   )
   const [query, setQuery] = useState('')
-  const [selectedId, setSelectedId] = useState(null)
+  const [selectedId, setSelectedId] = useState(startingPlaceId)
 
   // Dogs out walking are still placeholder data, positioned around the user.
   const dogsNearby = useMemo(
@@ -124,10 +132,19 @@ function MapScreen({ startingFilter }) {
             </button>
           </>
         )}
-        {dataStatus === 'ready' &&
-          `${visiblePlaces.length} places within ${SEARCH_RADIUS_KM} km${
-            locationStatus === 'found' ? ' of you' : ' of central Brisbane'
-          }`}
+        {dataStatus === 'ready' && (
+          <>
+            {`${visiblePlaces.length} places within ${SEARCH_RADIUS_KM} km ${
+              isPrecise ? 'of you' : 'of central Brisbane'
+            }`}
+            {!isPrecise && (
+              <button type="button" className="map-status__locate" onClick={requestLocation}>
+                <Crosshair size={14} aria-hidden="true" />
+                {locationStatus === 'locating' ? 'Finding you…' : 'Use my location'}
+              </button>
+            )}
+          </>
+        )}
       </p>
 
       <div aria-live="polite">

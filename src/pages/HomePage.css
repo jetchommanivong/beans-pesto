@@ -1,5 +1,11 @@
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
 .home-intro {
-  margin: 4px 0 16px;
+  margin-top: 4px;
 }
 
 .home-intro__eyebrow {
@@ -12,4 +18,151 @@
   font-size: 1.5rem;
   font-weight: 800;
   line-height: 1.2;
+}
+
+/* The one action on this screen that the nav bar can't do */
+.home-cta {
+  min-height: 56px;
+  font-size: 1.05rem;
+}
+
+/* ---------- Location ---------- */
+.home-location {
+  margin-top: -8px;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.home-location__button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-primary);
+  font-size: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- Sections ---------- */
+.home-section__title {
+  margin-bottom: 8px;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.home-placeholder {
+  padding: 16px;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+/* ---------- Closest park ---------- */
+.home-place {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-place:active {
+  transform: scale(0.99);
+}
+
+.home-place__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--tone-bg);
+  color: var(--tone-fg);
+}
+
+.home-place__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.home-place__name {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.home-place__detail,
+.home-dog__detail {
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-place__chevron,
+.home-dog__pin {
+  flex: none;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Water stop ---------- */
+.home-water {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: -6px;
+  padding: 12px 14px;
+  background: var(--tone-bg);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+.home-water svg {
+  flex: none;
+  color: var(--tone-fg);
+}
+
+/* ---------- Dogs out walking ---------- */
+.home-dogs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.home-dog {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 14px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-dog__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.home-dog__name {
+  font-weight: 800;
 }

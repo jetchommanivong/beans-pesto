@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router'
 import AppLayout from './components/AppLayout.jsx'
+import LocationProvider from './components/LocationProvider.jsx'
 import HomePage from './pages/HomePage.jsx'
 import MapPage from './pages/MapPage.jsx'
 import SocialPage from './pages/SocialPage.jsx'
@@ -33,20 +34,22 @@ export default function App() {
   }
 
   return (
-    <Routes>
-      {/* Main screens: header + bottom navigation */}
-      <Route element={<AppLayout />}>
-        <Route index element={<HomePage />} />
-        <Route path="map" element={<MapPage />} />
-        <Route path="social" element={<SocialPage />} />
-        <Route path="profile" element={<ProfilePage />} />
-      </Route>
+    <LocationProvider>
+      <Routes>
+        {/* Main screens: header + bottom navigation */}
+        <Route element={<AppLayout />}>
+          <Route index element={<HomePage />} />
+          <Route path="map" element={<MapPage />} />
+          <Route path="social" element={<SocialPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+        </Route>
 
-      {/* Screens without the bottom navigation */}
-      <Route element={<AppLayout showNav={false} />}>
-        <Route path="coming-soon" element={<UnderConstructionPage />} />
-        <Route path="*" element={<UnderConstructionPage />} />
-      </Route>
-    </Routes>
+        {/* Screens without the bottom navigation */}
+        <Route element={<AppLayout showNav={false} />}>
+          <Route path="coming-soon" element={<UnderConstructionPage />} />
+          <Route path="*" element={<UnderConstructionPage />} />
+        </Route>
+      </Routes>
+    </LocationProvider>
   )
 }
