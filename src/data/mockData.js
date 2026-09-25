@@ -1,4 +1,4 @@
-// Placeholder data for the prototype. Replace with real API calls later.
+// Placeholder data for the prototype.
 
 export const dogProfile = {
   name: 'Bailey',
