@@ -21,10 +21,10 @@
   justify-content: center;
   gap: 2px;
   min-height: 52px;
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   color: var(--color-text-muted);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
   transition:
     background-color 0.15s ease,

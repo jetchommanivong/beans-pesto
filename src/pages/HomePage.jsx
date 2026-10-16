@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { ChevronRight, Droplet, Footprints, MapPin, TreePine } from 'lucide-react'
+import { ChevronRight, Droplet, Footprints, MapPin, PawPrint } from 'lucide-react'
 import Avatar from '../components/Avatar.jsx'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
 import useUserLocation from '../hooks/useUserLocation.js'
@@ -20,7 +20,7 @@ export default function HomePage() {
   })
 
   // `places` is already sorted by distance, so the first of each type is the closest.
-  const nearestPark = places.find((place) => place.type === 'parks')
+  const nearestPark = places.find((place) => place.type === 'dogParks')
   const nearestWater = places.find((place) => place.type === 'water')
 
   return (
@@ -53,11 +53,11 @@ export default function HomePage() {
         {dataStatus === 'ready' &&
           (nearestPark ? (
             <Link
-              to={`/map?filter=parks&place=${nearestPark.id}`}
-              className="home-place tone-primary"
+              to={`/map?filter=dogParks&place=${nearestPark.id}`}
+              className="home-place tone-accent"
             >
               <span className="home-place__icon" aria-hidden="true">
-                <TreePine size={24} />
+                <PawPrint size={24} />
               </span>
               <span className="home-place__text">
                 <span className="home-place__name">{nearestPark.name}</span>

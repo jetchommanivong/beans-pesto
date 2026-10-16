@@ -26,9 +26,12 @@
 }
 
 .feature-card__title {
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1.2;
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
 
 .feature-card__art {
@@ -50,9 +53,9 @@
 .feature-card__arrow {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
   background: var(--tone-fg);
   color: #fff;
 }

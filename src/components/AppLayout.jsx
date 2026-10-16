@@ -1,5 +1,4 @@
 import { Outlet } from 'react-router'
-import { Sparkles } from 'lucide-react'
 import Header from './Header.jsx'
 import BottomNav from './BottomNav.jsx'
 import './AppLayout.css'

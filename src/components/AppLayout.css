@@ -34,11 +34,6 @@
   gap: 6px;
 }
 
-.app-footer__note svg {
-  flex: none;
-  margin-top: 2px;
-}
-
 @media (min-width: 520px) {
   .app-shell {
     box-shadow:

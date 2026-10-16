@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { ArrowRight, Check, UserPlus } from 'lucide-react'
 import Avatar from '../components/Avatar.jsx'
 import ListItem from '../components/ListItem.jsx'
-import { chats, groups, peopleToFollow } from '../data/mockData.js'
+import { chats, groups, owners } from '../data/mockData.js'
 import './SocialPage.css'
 
 const TABS = [
@@ -49,7 +49,7 @@ export default function SocialPage() {
             <section className="social-section">
               <SectionHeading title="People to follow" />
               <ul className="people-row">
-                {peopleToFollow.map((person) => {
+                {owners.map((person) => {
                   const isFollowing = followedIds.includes(person.id)
                   return (
                     <li key={person.id} className="person-card">

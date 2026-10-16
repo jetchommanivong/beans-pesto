@@ -15,9 +15,7 @@
 }
 
 .home-intro__title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  line-height: 1.2;
+  font-size: 1.7rem;
 }
 
 /* The one action on this screen that the nav bar can't do */
@@ -40,7 +38,7 @@
   background: none;
   color: var(--color-primary);
   font-size: inherit;
-  font-weight: 800;
+  font-weight: 700;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -48,8 +46,7 @@
 /* ---------- Sections ---------- */
 .home-section__title {
   margin-bottom: 8px;
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 1.1rem;
 }
 
 .home-placeholder {
@@ -98,8 +95,11 @@
 }
 
 .home-place__name {
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .home-place__detail,
@@ -164,5 +164,5 @@
 }
 
 .home-dog__name {
-  font-weight: 800;
+  font-weight: 700;
 }
