@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useHref, useParams } from 'react-router'
 import { CalendarClock, Check, ChevronRight, Copy, MapPin, Send } from 'lucide-react'
 import Avatar from '../components/Avatar.jsx'
@@ -34,6 +34,19 @@ function ChatScreen({ chat, onOpenChat }) {
   const [messages, setMessages] = useState(() => loadMessages(chat.id))
   const [draft, setDraft] = useState('')
   const [pinning, setPinning] = useState(false)
+  const chatRef = useRef(null)
+  const controlsRef = useRef(null)
+
+  useEffect(() => {
+    const controls = controlsRef.current
+    const updateClearance = () => {
+      chatRef.current?.style.setProperty('--chat-controls-height', `${controls.getBoundingClientRect().height}px`)
+    }
+    updateClearance()
+    const observer = new ResizeObserver(updateClearance)
+    observer.observe(controls)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -64,7 +77,7 @@ function ChatScreen({ chat, onOpenChat }) {
   }
 
   return (
-    <div className="chat">
+    <div className="chat" ref={chatRef}>
       {chat.isGroup ? (
         <header className="chat__identity">
           <ChatAvatar chat={chat} />
@@ -110,40 +123,44 @@ function ChatScreen({ chat, onOpenChat }) {
         )}
       </ul>
 
-      {pinning ? (
-        <PinComposer
-          onCancel={() => setPinning(false)}
-          onSend={(pin) => {
-            addMessage({ type: 'pin', ...pin })
-            setPinning(false)
-          }}
-        />
-      ) : (
-        <button
-          type="button"
-          className="button button--secondary chat__pin-button"
-          onClick={() => setPinning(true)}
-        >
-          <MapPin size={18} aria-hidden="true" />
-          Share a meet-up pin
-        </button>
-      )}
+      <div className="chat__controls" ref={controlsRef}>
+        <div className="chat__pin-tools">
+          {pinning ? (
+            <PinComposer
+              onCancel={() => setPinning(false)}
+              onSend={(pin) => {
+                addMessage({ type: 'pin', ...pin })
+                setPinning(false)
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              className="button button--secondary chat__pin-button"
+              onClick={() => setPinning(true)}
+            >
+              <MapPin size={18} aria-hidden="true" />
+              Share a meet-up pin
+            </button>
+          )}
+        </div>
 
-      <form className="chat__form" onSubmit={sendText}>
-        <label className="visually-hidden" htmlFor="chat-draft">
-          Message
-        </label>
-        <input
-          id="chat-draft"
-          className="chat__input"
-          value={draft}
-          placeholder="Write a message"
-          onChange={(event) => setDraft(event.target.value)}
-        />
-        <button type="submit" className="button button--primary chat__send" aria-label="Send">
-          <Send size={18} aria-hidden="true" />
-        </button>
-      </form>
+        <form className="chat__form" onSubmit={sendText}>
+          <label className="visually-hidden" htmlFor="chat-draft">
+            Message
+          </label>
+          <input
+            id="chat-draft"
+            className="chat__input"
+            value={draft}
+            placeholder="Write a message"
+            onChange={(event) => setDraft(event.target.value)}
+          />
+          <button type="submit" className="button button--primary chat__send" aria-label="Send">
+            <Send size={18} aria-hidden="true" />
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
