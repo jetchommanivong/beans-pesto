@@ -32,8 +32,6 @@ export default function HomePage() {
         <h1 className="home-intro__title">{saved.owner.name ? `Ready for a walk, ${saved.owner.name}?` : 'Ready for a walk?'}</h1>
       </section>
 
-      {!saved.onboardingComplete && <aside className="home-setup"><h2>Set up your profile</h2><p>Add your walking preferences and your dogs' details. You can browse without completing setup.</p><Link to="/onboarding" className="button button--secondary">Start guided setup</Link></aside>}
-
       {/* Opens the dog-park map until the walk screen (task 16) exists. */}
       <Link to="/map?filter=dogParks" className="button button--primary home-cta">
         <Footprints size={20} aria-hidden="true" />

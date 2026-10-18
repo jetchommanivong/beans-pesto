@@ -8,14 +8,14 @@ function getInitials(name) {
   return (first + last).toUpperCase()
 }
 
-export default function Avatar({ name, tone = 'primary', size = 48 }) {
+export default function Avatar({ name, photo, tone = 'primary', size = 48 }) {
   return (
     <span
       className={`avatar tone-${tone}`}
       style={{ '--avatar-size': `${size}px` }}
       aria-hidden="true"
     >
-      {getInitials(name)}
+      {photo ? <img src={photo} alt="" /> : getInitials(name)}
     </span>
   )
 }

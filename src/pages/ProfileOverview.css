@@ -1,0 +1,138 @@
+.profile-overview {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+.profile-overview__heading,
+.profile-overview__identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.profile-overview__heading {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.profile-overview__heading h1 {
+  font-size: 1.7rem;
+}
+
+.profile-overview__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-overview__edit {
+  padding-inline: 12px;
+  font-size: .85rem;
+}
+
+.profile-overview__privacy {
+  border-color: #b66a60;
+  background: #f9e7e4;
+  color: #8d3b32;
+}
+
+@media (hover: hover) {
+  .profile-overview__privacy:hover {
+    background: #f3d4cd;
+  }
+}
+
+.profile-overview__identity-text {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-owner.profile-panel {
+  gap: 18px;
+}
+
+.profile-owner h2 {
+  font-size: 2rem;
+}
+
+.profile-dog h3 {
+  font-size: 1.4rem;
+}
+
+.profile-owner__meta,
+.profile-dog__meta {
+  color: var(--color-text-muted);
+  font-size: .85rem;
+}
+
+.profile-overview__setup {
+  background: var(--color-primary-soft);
+}
+
+.profile-owner__suburb {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-text-muted);
+  font-size: .85rem;
+}
+
+.profile-owner__suburb svg,
+.profile-owner__details svg {
+  flex: none;
+  color: var(--color-primary);
+}
+
+.profile-owner__details {
+  display: grid;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+  overflow-wrap: anywhere;
+}
+
+.profile-owner__details dt {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+  color: var(--color-text-muted);
+  font-size: .78rem;
+}
+
+.profile-owner__details dd {
+  font-size: .9rem;
+}
+
+.profile-overview__section-title {
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+
+.profile-overview__dog-list {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-dog.profile-panel {
+  padding: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.profile-dog__breed,
+.profile-overview__empty p {
+  color: var(--color-text-muted);
+  font-size: .85rem;
+}
+
+.profile-dog .dog-tags {
+  margin-top: 0;
+}
+
+.profile-overview a:not(.button):not(.list-item) {
+  color: var(--color-primary);
+}
