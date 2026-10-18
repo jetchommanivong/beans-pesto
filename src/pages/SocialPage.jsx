@@ -1,10 +1,13 @@
 import { useState } from 'react'
-import { Link } from 'react-router'
-import { ArrowRight, Check, UserPlus } from 'lucide-react'
+import { Check, UserPlus } from 'lucide-react'
 import Avatar from '../components/Avatar.jsx'
 import ListItem from '../components/ListItem.jsx'
 import { chats, groups, owners } from '../data/mockData.js'
 import './SocialPage.css'
+
+// One colour per kind of thing, as on the map: every group is green, every chat is blue.
+const GROUP_TONE = 'primary'
+const CHAT_TONE = 'water'
 
 const TABS = [
   { id: 'following', label: 'Following' },
@@ -74,30 +77,13 @@ export default function SocialPage() {
               </ul>
             </section>
 
-            <section className="social-section">
-              <SectionHeading title="Groups & chats" />
-              <ul className="list">
-                {groups.slice(0, 2).map((group) => (
-                  <ListItem key={group.id} title={group.name} subtitle={group.subtitle} tone={group.tone} />
-                ))}
-                {chats.slice(0, 2).map((chat) => (
-                  <ListItem
-                    key={chat.id}
-                    title={chat.name}
-                    subtitle={chat.subtitle}
-                    meta={chat.time}
-                    tone={chat.tone}
-                  />
-                ))}
-              </ul>
-            </section>
           </>
         )}
 
         {activeTab === 'groups' && (
           <ul className="list">
             {groups.map((group) => (
-              <ListItem key={group.id} title={group.name} subtitle={group.subtitle} tone={group.tone} />
+              <ListItem key={group.id} title={group.name} subtitle={group.subtitle} tone={GROUP_TONE} />
             ))}
           </ul>
         )}
@@ -110,7 +96,8 @@ export default function SocialPage() {
                 title={chat.name}
                 subtitle={chat.subtitle}
                 meta={chat.time}
-                tone={chat.tone}
+                tone={CHAT_TONE}
+                to={`/social/chat/${chat.id}`}
               />
             ))}
           </ul>
@@ -124,9 +111,6 @@ function SectionHeading({ title }) {
   return (
     <div className="section-heading">
       <h2 className="section-heading__title">{title}</h2>
-      <Link to="/coming-soon" className="section-heading__link">
-        See all <ArrowRight size={16} aria-hidden="true" />
-      </Link>
     </div>
   )
 }

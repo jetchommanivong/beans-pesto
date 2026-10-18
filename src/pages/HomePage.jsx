@@ -30,7 +30,8 @@ export default function HomePage() {
         <h1 className="home-intro__title">Ready for a walk, {dogProfile.name}?</h1>
       </section>
 
-      <Link to="/coming-soon" className="button button--primary home-cta">
+      {/* Opens the dog-park map until the walk screen (task 16) exists. */}
+      <Link to="/map?filter=dogParks" className="button button--primary home-cta">
         <Footprints size={20} aria-hidden="true" />
         Start a walk
       </Link>
@@ -87,7 +88,7 @@ export default function HomePage() {
         <ul className="home-dogs">
           {nearbyDogs.map((dog) => (
             <li key={dog.id}>
-              <Link to="/map?filter=dogs" className="home-dog">
+              <Link to="/social" className="home-dog">
                 <Avatar name={dog.name} tone="accent" size={44} />
                 <span className="home-dog__text">
                   <span className="home-dog__name">{dog.name}</span>

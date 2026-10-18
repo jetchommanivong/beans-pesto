@@ -5,7 +5,9 @@ import LocationProvider from './components/LocationProvider.jsx'
 import HomePage from './pages/HomePage.jsx'
 import MapPage from './pages/MapPage.jsx'
 import SocialPage from './pages/SocialPage.jsx'
+import ChatPage from './pages/ChatPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
+import AccountPrivacyPage from './pages/AccountPrivacyPage.jsx'
 import LoadingScreen from './pages/LoadingScreen.jsx'
 import UnderConstructionPage from './pages/UnderConstructionPage.jsx'
 
@@ -44,9 +46,11 @@ export default function App() {
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
-        {/* Screens without the bottom navigation */}
+        {/* Sub-pages: no bottom navigation, so the header shows a back button */}
         <Route element={<AppLayout showNav={false} />}>
-          <Route path="coming-soon" element={<UnderConstructionPage />} />
+          <Route path="profile/privacy" element={<AccountPrivacyPage />} />
+          <Route path="social/chat/:chatId" element={<ChatPage />} />
+          {/* Only reached by a mistyped address; nothing in the app links here. */}
           <Route path="*" element={<UnderConstructionPage />} />
         </Route>
       </Routes>

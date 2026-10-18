@@ -1,0 +1,76 @@
+.privacy {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.privacy__intro {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.privacy__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.privacy-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.privacy-row__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.privacy-row__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.privacy-row__title {
+  font-weight: 600;
+}
+
+.privacy-row__description {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+/* A switch with a visible On/Off word, so state never depends on colour alone. */
+.privacy-switch {
+  flex: none;
+  min-width: 64px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.privacy-switch[aria-checked='true'] {
+  background: var(--color-primary);
+  color: #fff;
+}

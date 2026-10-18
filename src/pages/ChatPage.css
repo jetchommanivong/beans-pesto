@@ -1,0 +1,162 @@
+.chat,
+.chat__messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-missing {
+  padding: 24px 0;
+  text-align: center;
+}
+
+.bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+
+.bubble--them {
+  align-self: flex-start;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.bubble--me {
+  align-self: flex-end;
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.pin {
+  align-self: flex-end;
+  width: 88%;
+  padding: 12px;
+  border: 1.5px solid var(--tone-fg);
+  border-radius: var(--radius-lg);
+  background: var(--tone-bg);
+}
+
+.pin__label {
+  color: var(--tone-fg);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pin__place {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+.pin__time {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.pin__actions,
+.composer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chat__pin-button {
+  align-self: stretch;
+}
+
+.chat__form {
+  display: flex;
+  gap: 8px;
+}
+
+.chat__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+
+.chat__send {
+  padding: 0 16px;
+}
+
+.composer {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.composer__title {
+  margin-bottom: 8px;
+  font-size: 1.05rem;
+}
+
+.composer__note {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.composer__places {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.composer__place {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+.composer__place[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  font-weight: 600;
+}
+
+.composer__distance {
+  flex: none;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.composer__time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.composer__time input {
+  margin-left: auto;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

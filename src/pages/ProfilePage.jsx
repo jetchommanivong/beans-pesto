@@ -1,9 +1,18 @@
-import { Dog, Footprints, ShieldCheck, Smile, TreePine } from 'lucide-react'
+import { Link } from 'react-router'
+import { ChevronRight, Dog, Footprints, ShieldCheck, Smile, TreePine } from 'lucide-react'
+import DogTags from '../components/DogTags.jsx'
 import FeatureCard from '../components/FeatureCard.jsx'
+import usePrivacySettings from '../hooks/usePrivacySettings.js'
+import { dogDetails } from '../data/dogDetails.js'
 import { dogProfile } from '../data/mockData.js'
+import '../components/ListItem.css'
 import './ProfilePage.css'
+import './ProfileAccount.css'
 
 export default function ProfilePage() {
+  const { settings } = usePrivacySettings()
+
+  // Dog details only. Privacy is an account setting, so it is no longer a dog card.
   const profileCards = [
     {
       title: 'Temperament',
@@ -22,12 +31,6 @@ export default function ProfilePage() {
       description: dogProfile.walkPreferences,
       icon: Footprints,
       tone: 'water',
-    },
-    {
-      title: 'Privacy',
-      description: dogProfile.privacy,
-      icon: ShieldCheck,
-      tone: 'primary',
     },
   ]
 
@@ -49,14 +52,28 @@ export default function ProfilePage() {
               <dd>{dogProfile.temperament}</dd>
             </div>
           </dl>
+          <DogTags size={dogDetails.size} tags={dogDetails.temperamentTags} />
         </div>
       </section>
 
       <div className="card-grid">
         {profileCards.map((card) => (
-          <FeatureCard key={card.title} to="/coming-soon" {...card} />
+          <FeatureCard key={card.title} {...card} />
         ))}
       </div>
+
+      <h2 className="profile-account-title">Your account</h2>
+      <Link to="/profile/privacy" className="list-item tone-primary profile-privacy">
+        <ShieldCheck size={24} aria-hidden="true" />
+        <span className="list-item__text">
+          <span className="list-item__title">Privacy</span>
+          <span className="list-item__subtitle">
+            Location sharing {settings.shareLocation ? 'on' : 'off'} · Suggested to others{' '}
+            {settings.suggestToOthers ? 'on' : 'off'}
+          </span>
+        </span>
+        <ChevronRight className="list-item__chevron" size={20} aria-hidden="true" />
+      </Link>
     </>
   )
 }

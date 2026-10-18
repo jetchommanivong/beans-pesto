@@ -4,10 +4,11 @@ import BottomNav from './BottomNav.jsx'
 import './AppLayout.css'
 
 // Wraps every screen. Renders `children` if given, otherwise the matched route.
+// Screens without the bottom navigation are sub-pages, so they get a back button.
 export default function AppLayout({ showNav = true, children }) {
   return (
     <div className={`app-shell ${showNav ? '' : 'app-shell--no-nav'}`}>
-      <Header />
+      <Header showBack={!showNav} />
       <main className="app-main">{children ?? <Outlet />}</main>
       <footer className="app-footer">
         <p className="app-footer__note">
