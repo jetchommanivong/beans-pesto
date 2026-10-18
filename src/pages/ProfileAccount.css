@@ -1,0 +1,19 @@
+
+.profile-account-title {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+.profile-privacy {
+  color: var(--color-text);
+}
+
+.profile-privacy > svg:first-child {
+  flex: none;
+  color: var(--tone-fg);
+}
+
+.profile-privacy .list-item__subtitle {
+  white-space: normal;
+}
