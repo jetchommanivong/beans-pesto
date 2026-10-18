@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Route, Routes } from 'react-router'
 import AppLayout from './components/AppLayout.jsx'
+import ProfileProvider from './components/ProfileProvider.jsx'
+import OnboardingPage from './pages/OnboardingPage.jsx'
 import LocationProvider from './components/LocationProvider.jsx'
 import HomePage from './pages/HomePage.jsx'
 import MapPage from './pages/MapPage.jsx'
@@ -37,6 +39,7 @@ export default function App() {
 
   return (
     <LocationProvider>
+      <ProfileProvider>
       <Routes>
         {/* Main screens: header + bottom navigation */}
         <Route element={<AppLayout />}>
@@ -48,12 +51,14 @@ export default function App() {
 
         {/* Sub-pages: no bottom navigation, so the header shows a back button */}
         <Route element={<AppLayout showNav={false} />}>
+          <Route path="onboarding" element={<OnboardingPage />} />
           <Route path="profile/privacy" element={<AccountPrivacyPage />} />
           <Route path="social/chat/:chatId" element={<ChatPage />} />
           {/* Only reached by a mistyped address; nothing in the app links here. */}
           <Route path="*" element={<UnderConstructionPage />} />
         </Route>
       </Routes>
+      </ProfileProvider>
     </LocationProvider>
   )
 }
