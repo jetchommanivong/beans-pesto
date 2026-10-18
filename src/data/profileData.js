@@ -48,9 +48,20 @@ export const TAG_LABELS = Object.fromEntries(TEMPERAMENT_TAGS.map(tag => [tag.id
 export function newDogId() {
   return globalThis.crypto?.randomUUID?.() ?? `dog-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
-export const createDog = () => ({ id: newDogId(), name: '', breed: '', size: '', temperamentTags: [] })
-export const createProfile = () => ({ owner: { name: '', suburb: '', preferences: '', favouritePark: '' }, dogs: [createDog()], onboardingComplete: false })
+export const createDog = () => ({ id: newDogId(), name: '', breed: '', age: '', ageUnit: 'years', sex: '', photo: '', size: '', temperamentTags: [] })
+export const createProfile = () => ({ owner: { name: '', age: '', gender: '', pronouns: '', photo: '', suburb: '', preferences: '', favouritePark: '' }, dogs: [createDog()], onboardingComplete: false })
 const text = (value, max) => typeof value === 'string' ? value.trim().slice(0, max) : ''
+const age = (value, max) => {
+  const input = typeof value === 'number' ? String(value) : typeof value === 'string' ? value.trim() : ''
+  return /^\d+$/.test(input) && Number(input) <= max ? String(Number(input)) : ''
+}
+const photo = value => typeof value === 'string' && value.length <= 200000 && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(value) ? value : ''
+
+export function formatAge(value, unit = 'years') {
+  if (value === '' || value == null) return ''
+  const label = unit === 'months' ? 'month' : 'year'
+  return `${value} ${label}${Number(value) === 1 ? '' : 's'} old`
+}
 
 export function normalizeProfile(value) {
   if (!value || typeof value !== 'object' || !value.owner || !Array.isArray(value.dogs)) throw new Error('Invalid profile')
@@ -61,10 +72,11 @@ export function normalizeProfile(value) {
     ids.add(id)
     // Accept labels from the earlier prototype, then store stable tag IDs.
     const tags = [...new Set((Array.isArray(dog.temperamentTags) ? dog.temperamentTags : Array.isArray(dog.tags) ? dog.tags : []).map(tag => TAG_LABELS[tag] ? tag : TEMPERAMENT_TAGS.find(item => item.label === tag)?.id).filter(Boolean))]
-    return { id, name: text(dog.name, 60), breed: text(dog.breed, 80), size: ['small', 'medium', 'large'].includes(dog.size) ? dog.size : '', temperamentTags: tags }
+    const ageUnit = dog.ageUnit === 'months' ? 'months' : 'years'
+    return { id, name: text(dog.name, 60), breed: text(dog.breed, 80), age: age(dog.age, ageUnit === 'months' ? 360 : 30), ageUnit, sex: ['female', 'male'].includes(dog.sex) ? dog.sex : '', photo: photo(dog.photo), size: ['small', 'medium', 'large'].includes(dog.size) ? dog.size : '', temperamentTags: tags }
   })
   return {
-    owner: { name: text(value.owner.name, 60), suburb: text(value.owner.suburb, 80), preferences: text(value.owner.preferences, 160), favouritePark: text(value.owner.favouritePark, 100) },
+    owner: { name: text(value.owner.name, 60), age: age(value.owner.age, 120), gender: text(value.owner.gender, 40), pronouns: text(value.owner.pronouns, 40), photo: photo(value.owner.photo), suburb: text(value.owner.suburb, 80), preferences: text(value.owner.preferences, 160), favouritePark: text(value.owner.favouritePark, 100) },
     dogs: dogs.length ? dogs : [createDog()],
     onboardingComplete: value.onboardingComplete === true,
   }

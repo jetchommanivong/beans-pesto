@@ -166,7 +166,3 @@
 .home-dog__name {
   font-weight: 700;
 }
-
-.home-setup { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-primary-soft); }
-.home-setup h2 { font-size: 1.2rem; }
-.home-setup p { font-size: .85rem; }

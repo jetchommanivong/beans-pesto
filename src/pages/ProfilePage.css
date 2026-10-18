@@ -7,6 +7,10 @@
 .profile-panel h3 { font-size: 1.1rem; overflow-wrap: anywhere; }
 .profile-panel label { display: grid; gap: 6px; font-size: .9rem; font-weight: 600; }
 .profile-panel input:not([type=checkbox]) { width: 100%; min-width: 0; min-height: 44px; padding: 10px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-bg); }
+.profile-field-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.profile-photo-input { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; min-width: 0; }
+.profile-photo-input__controls { display: grid; flex: 1 1 180px; gap: 8px; min-width: 0; }
+.profile-photo-input input[type=file] { font-size: .8rem; padding: 8px; }
 .profile-help { font-size: .82rem; color: var(--color-text-muted); line-height: 1.6; }
 .profile-panel fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 .profile-panel legend { margin-bottom: 8px; font-weight: 600; font-size: .9rem; }

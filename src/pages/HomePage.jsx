@@ -4,9 +4,10 @@ import Avatar from '../components/Avatar.jsx'
 import HomePrivacyStatus from '../components/HomePrivacyStatus.jsx'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
 import usePrivacySettings from '../hooks/usePrivacySettings.js'
+import useProfile from '../hooks/useProfile.js'
 import useUserLocation from '../hooks/useUserLocation.js'
 import { formatDistance } from '../data/brisbaneOpenData.js'
-import { dogProfile, nearbyDogs } from '../data/mockData.js'
+import { nearbyDogs } from '../data/mockData.js'
 import './HomePage.css'
 
 const SEARCH_RADIUS_KM = 3
@@ -14,6 +15,7 @@ const SEARCH_RADIUS_KM = 3
 // Home answers "what should I do right now?". Getting to the Map, Social and
 // Profile screens is the bottom navigation's job, so nothing here repeats it.
 export default function HomePage() {
+  const { saved } = useProfile()
   const { location, isPrecise, status, requestLocation } = useUserLocation()
   const { settings } = usePrivacySettings()
   const { places, status: dataStatus } = useNearbyPlaces({
@@ -26,11 +28,16 @@ export default function HomePage() {
   const nearestPark = places.find((place) => place.type === 'dogParks')
   const nearestWater = places.find((place) => place.type === 'water')
 
+  // A saved profile always holds a dog, but it may not be named yet.
+  const myDogName = saved.dogs.find((dog) => dog.name.trim())?.name.trim() ?? ''
+
   return (
     <div className="home">
       <section className="home-intro">
         <p className="home-intro__eyebrow">Good to see you!</p>
-        <h1 className="home-intro__title">Ready for a walk, {dogProfile.name}?</h1>
+        <h1 className="home-intro__title">
+          {saved.owner.name ? `Ready for a walk, ${saved.owner.name}?` : 'Ready for a walk?'}
+        </h1>
       </section>
 
       <HomePrivacyStatus settings={settings} />
@@ -94,9 +101,11 @@ export default function HomePage() {
           {settings.shareLocation && (
             <li>
               <Link to="/profile/privacy" className="home-dog">
-                <Avatar name={dogProfile.name} tone="primary" size={44} />
+                <Avatar name={myDogName || saved.owner.name || 'You'} tone="primary" size={44} />
                 <span className="home-dog__text">
-                  <span className="home-dog__name">You and {dogProfile.name}</span>
+                  <span className="home-dog__name">
+                    {myDogName ? `You and ${myDogName}` : 'You'}
+                  </span>
                   <span className="home-dog__detail">Visible to friends while you walk</span>
                 </span>
                 <MapPin className="home-dog__pin" size={18} aria-hidden="true" />

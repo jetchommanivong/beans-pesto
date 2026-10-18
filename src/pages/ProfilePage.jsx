@@ -1,80 +1,45 @@
 import { Link } from 'react-router'
-import { ChevronRight, Dog, Footprints, ShieldCheck, Smile, TreePine } from 'lucide-react'
-import DogTagEditor from '../components/DogTagEditor.jsx'
-import FeatureCard from '../components/FeatureCard.jsx'
-import useDogTags from '../hooks/useDogTags.js'
-import usePrivacySettings from '../hooks/usePrivacySettings.js'
-import { dogProfile } from '../data/mockData.js'
-import '../components/ListItem.css'
+import { Pencil, ShieldCheck } from 'lucide-react'
+import ProfileDetails from '../components/ProfileDetails.jsx'
+import useProfile from '../hooks/useProfile.js'
 import './ProfilePage.css'
-import './ProfileAccount.css'
+import './ProfileOverview.css'
 
 export default function ProfilePage() {
-  const { settings } = usePrivacySettings()
-  const { details, setDetails } = useDogTags()
-
-  // Dog details only. Privacy is an account setting, so it is no longer a dog card.
-  const profileCards = [
-    {
-      title: 'Temperament',
-      description: dogProfile.temperament,
-      icon: Smile,
-      tone: 'accent',
-    },
-    {
-      title: 'Favourite Park',
-      description: dogProfile.favouritePark,
-      icon: TreePine,
-      tone: 'primary',
-    },
-    {
-      title: 'Walk Preferences',
-      description: dogProfile.walkPreferences,
-      icon: Footprints,
-      tone: 'water',
-    },
-  ]
+  const { saved, dirty, notice } = useProfile()
 
   return (
-    <>
-      <section className="profile-hero">
-        <div className="profile-hero__photo" aria-hidden="true">
-          <Dog size={56} strokeWidth={1.5} />
+    <div className="profile-overview">
+      <header className="profile-overview__heading">
+        <h1>Your profile</h1>
+        <div className="profile-overview__actions">
+          {saved.onboardingComplete && <Link to="/profile/edit" className="button button--secondary profile-overview__edit">
+            <Pencil size={16} aria-hidden="true" />
+            Edit profile
+          </Link>}
+          <Link to="/profile/privacy" className="button profile-overview__edit profile-overview__privacy">
+            <ShieldCheck size={17} aria-hidden="true" />
+            Privacy
+          </Link>
         </div>
-        <div className="profile-hero__info">
-          <h1 className="profile-hero__name">{dogProfile.name}</h1>
-          <dl className="profile-hero__facts">
-            <div>
-              <dt>Breed</dt>
-              <dd>{dogProfile.breed}</dd>
-            </div>
-            <div>
-              <dt>Temperament</dt>
-              <dd>{dogProfile.temperament}</dd>
-            </div>
-          </dl>
-          <DogTagEditor details={details} onChange={setDetails} />
-        </div>
-      </section>
+      </header>
 
-      <div className="card-grid">
-        {profileCards.map((card) => (
-          <FeatureCard key={card.title} {...card} />
-        ))}
-      </div>
+      {notice && <p className="profile-notice" role="alert">{notice}</p>}
+      {dirty && saved.onboardingComplete && (
+        <p className="profile-notice">
+          You have unsaved changes. <Link to="/profile/edit">Continue editing</Link>
+        </p>
+      )}
 
-      <h2 className="profile-account-title">Your account</h2>
-      <Link to="/profile/privacy" className="list-item tone-primary profile-privacy">
-        <ShieldCheck size={24} aria-hidden="true" />
-        <span className="list-item__text">
-          <span className="list-item__title">Privacy</span>
-          <span className="list-item__subtitle">
-            Location sharing {settings.shareLocation ? 'on' : 'off'} · Suggested to others{' '}
-            {settings.suggestToOthers ? 'on' : 'off'}
-          </span>
-        </span>
-        <ChevronRight className="list-item__chevron" size={20} aria-hidden="true" />
-      </Link>
-    </>
+      {!saved.onboardingComplete ? (
+        <section className="profile-panel profile-overview__setup" aria-labelledby="profile-setup-title">
+          <h2 id="profile-setup-title">Create your profile</h2>
+          <p>Tell us a little about yourself and add your dogs in a few simple steps.</p>
+          <Link to="/onboarding" className="button button--primary">{dirty ? 'Continue setup' : 'Create profile'}</Link>
+        </section>
+      ) : <ProfileDetails profile={saved} />}
+
+      <p className="profile-help">Your details and photos stay on this browser and aren't shown to other people.</p>
+    </div>
   )
 }
