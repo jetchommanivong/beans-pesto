@@ -5,8 +5,8 @@ import { formatAge, TAG_LABELS } from '../data/profileData.js'
 import '../pages/ProfilePage.css'
 import '../pages/ProfileOverview.css'
 
-// The saved profile and guided setup preview share the same cards and styling.
-export default function ProfileDetails({ profile }) {
+// Personal profiles, public profiles, and setup previews share these cards.
+export default function ProfileDetails({ profile, dogsTitle = 'Your dogs' }) {
   const { owner } = profile
   const dogs = profile.dogs.filter(dog => dog.name.trim())
 
@@ -45,7 +45,7 @@ export default function ProfileDetails({ profile }) {
       </section>
 
       <section className="profile-overview__dogs" aria-labelledby="profile-dogs-title">
-        <h2 id="profile-dogs-title" className="profile-overview__section-title">Your dogs ({dogs.length})</h2>
+        <h2 id="profile-dogs-title" className="profile-overview__section-title">{dogsTitle} ({dogs.length})</h2>
         {dogs.length ? (
           <ul className="profile-overview__dog-list">
             {dogs.map(dog => (

@@ -1,35 +1,23 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useHref, useParams } from 'react-router'
-import { CalendarClock, Check, Copy, MapPin, Send } from 'lucide-react'
+import { CalendarClock, Check, ChevronRight, Copy, MapPin, Send } from 'lucide-react'
+import Avatar from '../components/Avatar.jsx'
+import ChatAvatar from '../components/ChatAvatar.jsx'
+import ListItem from '../components/ListItem.jsx'
+import OwnerListItem from '../components/OwnerListItem.jsx'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
 import useUserLocation from '../hooks/useUserLocation.js'
 import { formatDistance } from '../data/brisbaneOpenData.js'
-import { chats } from '../data/mockData.js'
+import { allChats, owners } from '../data/mockData.js'
+import { loadMessages, saveMessages } from '../data/chatMessages.js'
 import './ChatPage.css'
 
 const SEARCH_RADIUS_KM = 3
 
-function loadMessages(chatId) {
-  try {
-    return JSON.parse(localStorage.getItem(`tailmates.chat.${chatId}`) ?? '[]')
-  } catch {
-    return []
-  }
-}
-
-function saveMessages(chatId, messages) {
-  try {
-    localStorage.setItem(`tailmates.chat.${chatId}`, JSON.stringify(messages))
-  } catch {
-    // Storage blocked: the chat still works for this visit.
-  }
-}
-
-// A chat with one other owner. From here you can send a one-off meet-up pin:
-// a dog park and a time that either of you can open on the map or copy as a link.
-export default function ChatPage() {
+// Direct and group conversations share the same messages and meet-up composer.
+export default function ChatPage({ onOpenChat }) {
   const { chatId } = useParams()
-  const chat = chats.find((item) => item.id === chatId)
+  const chat = allChats.find((item) => item.id === chatId)
 
   if (!chat) {
     return (
@@ -39,20 +27,32 @@ export default function ChatPage() {
     )
   }
 
-  return <ChatScreen key={chat.id} chat={chat} />
+  return <ChatScreen key={chat.id} chat={chat} onOpenChat={onOpenChat} />
 }
 
-function ChatScreen({ chat }) {
+function ChatScreen({ chat, onOpenChat }) {
   const [messages, setMessages] = useState(() => loadMessages(chat.id))
   const [draft, setDraft] = useState('')
   const [pinning, setPinning] = useState(false)
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    onOpenChat(chat.id)
+  }, [chat.id, onOpenChat])
+
+  useEffect(() => {
+    saveMessages(chat.id, messages)
+  }, [chat.id, messages])
+
   function addMessage(message) {
-    setMessages((current) => {
-      const next = [...current, { id: Date.now(), from: 'me', ...message }]
-      saveMessages(chat.id, next)
-      return next
-    })
+    const next = {
+      id: globalThis.crypto?.randomUUID?.() ?? `message-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      from: 'me',
+      createdAt: Date.now(),
+      sentAt: new Date().toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }),
+      ...message,
+    }
+    setMessages((current) => [...current, next])
   }
 
   function sendText(event) {
@@ -65,17 +65,47 @@ function ChatScreen({ chat }) {
 
   return (
     <div className="chat">
-      <h1 className="chat__title">{chat.name}</h1>
+      {chat.isGroup ? (
+        <header className="chat__identity">
+          <ChatAvatar chat={chat} />
+          <div className="chat__identity-text">
+            <h1 className="chat__title">{chat.name}</h1>
+            <p className="chat__subtitle">{chat.subtitle}</p>
+          </div>
+        </header>
+      ) : (
+        <Link to={`/social/people/${chat.ownerId}`} className="chat__identity">
+          <Avatar name={chat.name} tone={chat.tone} />
+          <div className="chat__identity-text">
+            <h1 className="chat__title">{chat.name}</h1>
+            <p className="chat__subtitle">View profile</p>
+          </div>
+          <ChevronRight size={20} aria-hidden="true" />
+        </Link>
+      )}
+
+      {chat.isGroup && (
+        <details className="chat__members">
+          <summary>Members ({chat.memberIds.length + 1})</summary>
+          <ul className="list" aria-label="Group members">
+            <ListItem title="You" subtitle="Your profile" tone="primary" to="/profile" />
+            {chat.memberIds.map((id) => {
+              const person = owners.find((owner) => owner.id === id)
+              return <OwnerListItem key={id} person={person} />
+            })}
+          </ul>
+        </details>
+      )}
 
       <ul className="chat__messages" aria-label="Messages">
-        <li className="bubble bubble--them">{chat.subtitle}</li>
-        {messages.map((message) =>
+        {chat.messages.length === 0 && messages.length === 0 && (
+          <li className="chat__empty">Say hello to {chat.name} and plan your next walk.</li>
+        )}
+        {[...chat.messages, ...messages].map((message) =>
           message.type === 'pin' ? (
             <PinMessage key={message.id} pin={message} />
           ) : (
-            <li key={message.id} className="bubble bubble--me">
-              {message.text}
-            </li>
+            <TextMessage key={message.id} message={message} isGroup={chat.isGroup} />
           ),
         )}
       </ul>
@@ -115,6 +145,22 @@ function ChatScreen({ chat }) {
         </button>
       </form>
     </div>
+  )
+}
+
+function TextMessage({ message, isGroup }) {
+  const sender = owners.find((person) => person.id === message.from)
+  const isMe = message.from === 'me'
+  const time = message.sentAt ?? message.time
+
+  return (
+    <li className={`bubble ${isMe ? 'bubble--me' : 'bubble--them'}`}>
+      {isGroup && sender && (
+        <Link to={`/social/people/${sender.id}`} className="bubble__sender">{sender.name}</Link>
+      )}
+      <p>{message.text}</p>
+      {time && <span className="bubble__time">{time}</span>}
+    </li>
   )
 }
 

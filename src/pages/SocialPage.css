@@ -1,7 +1,101 @@
 .social-page {
+  --suggestions-height: 224px;
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.social-page--suggestions {
+  padding-bottom: calc(var(--suggestions-height) + var(--nav-height) + env(safe-area-inset-bottom));
+}
+
+.social-panel {
+  display: grid;
+  /* Long conversation previews must shrink within the app column. */
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: 12px;
+}
+
+.social-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.social-search:focus-within {
+  border-color: var(--color-primary);
+}
+
+.social-search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.85rem;
+}
+
+.social-search input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.social-search button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  min-height: 40px;
+  margin-right: -10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.chat-filters {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-filters button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chat-filters button[aria-pressed='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.chat-filters__sort {
+  margin-left: auto;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.social-follow-back {
+  min-height: 44px;
+  padding-inline: 10px;
 }
 
 /* ---------- Tabs ---------- */
@@ -30,10 +124,6 @@
 }
 
 /* ---------- Sections ---------- */
-.social-section + .social-section {
-  margin-top: 24px;
-}
-
 .section-heading {
   display: flex;
   align-items: center;
@@ -49,28 +139,61 @@
   letter-spacing: -0.01em;
 }
 
-.section-heading__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 44px;
-  padding: 0 4px;
-  color: var(--color-primary);
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-decoration: none;
+.section-heading__count {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
 }
 
-/* ---------- People to follow (swipe sideways) ---------- */
+.social-empty {
+  padding: 20px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.social-empty p + p {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.social-suggestions {
+  position: fixed;
+  bottom: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 9;
+  width: 100%;
+  max-width: var(--app-max-width);
+  height: var(--suggestions-height);
+  padding: 12px 16px;
+  transform: translateX(-50%);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg);
+  box-shadow: 0 -4px 12px rgb(43 42 40 / 4%);
+}
+
+.social-suggestions .section-heading {
+  margin-bottom: 8px;
+}
+
+/* ---------- Suggested profiles (swipe sideways) ---------- */
 .people-row {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  /* One full card and half of the next make the sideways scroll visible. */
+  grid-auto-columns: calc((100% - 12px) / 1.5);
   gap: 12px;
-  margin: 0 -16px;
-  padding: 2px 16px 8px;
+  padding: 2px 0 8px;
   overflow-x: auto;
-  scroll-padding-inline: 16px;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
+}
+
+@media (min-width: 400px) {
+  .people-row {
+    /* Wider screens show two full cards and half of the third. */
+    grid-auto-columns: calc((100% - 24px) / 2.5);
+  }
 }
 
 .people-row::-webkit-scrollbar {
@@ -83,8 +206,8 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  width: 148px;
-  padding: 16px 12px 12px;
+  min-width: 0;
+  padding: 10px;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -95,19 +218,31 @@
 
 .person-card__name {
   width: 100%;
-  margin-top: 6px;
+  margin-top: 4px;
   overflow: hidden;
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.person-card__profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
 .person-card__dog {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   color: var(--color-text-muted);
   font-size: 0.85rem;
 }
 
 .person-card .button {
   width: 100%;
+  padding-inline: 8px;
 }

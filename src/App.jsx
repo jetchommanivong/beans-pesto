@@ -13,12 +13,15 @@ import EditProfilePage from './pages/EditProfilePage.jsx'
 import AccountPrivacyPage from './pages/AccountPrivacyPage.jsx'
 import LoadingScreen from './pages/LoadingScreen.jsx'
 import UnderConstructionPage from './pages/UnderConstructionPage.jsx'
+import useSocialState from './hooks/useSocialState.js'
+import OwnerProfilePage from './pages/OwnerProfilePage.jsx'
 
 // How long the splash screen shows when the app first opens.
 const LOADING_DURATION_MS = 1200
 const LOADING_TICK_MS = 50
 
 export default function App() {
+  const social = useSocialState()
   const [progress, setProgress] = useState(0)
   const isLoading = progress < 100
 
@@ -46,7 +49,7 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route index element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
-          <Route path="social" element={<SocialPage />} />
+          <Route path="social" element={<SocialPage {...social} />} />
           <Route path="profile" element={<ProfilePage />} />
         </Route>
 
@@ -55,7 +58,8 @@ export default function App() {
           <Route path="onboarding" element={<OnboardingPage />} />
           <Route path="profile/edit" element={<EditProfilePage />} />
           <Route path="profile/privacy" element={<AccountPrivacyPage />} />
-          <Route path="social/chat/:chatId" element={<ChatPage />} />
+          <Route path="social/chat/:chatId" element={<ChatPage onOpenChat={social.openChat} />} />
+          <Route path="social/people/:ownerId" element={<OwnerProfilePage followedIds={social.followedIds} toggleFollow={social.toggleFollow} />} />
           {/* Only reached by a mistyped address; nothing in the app links here. */}
           <Route path="*" element={<UnderConstructionPage />} />
         </Route>
