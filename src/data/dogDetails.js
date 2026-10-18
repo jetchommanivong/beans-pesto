@@ -1,12 +1,27 @@
 // Extra details for the signed-in owner's dog, kept apart from the shared sample
 // data so adding it can't clash with other edits. Size matches the three bands the
 // council data uses for dog parks (small, medium, large).
-//
-// These are this one dog's chosen tags. The list everyone chooses from is
-// TEMPERAMENT_TAGS in profileData.js. Written as labels because that is the
-// format normalizeProfile() migrates from; anything not matching a current label
-// is dropped, so keep these in step with that list.
 export const dogDetails = {
   size: 'large',
-  temperamentTags: ['Reliable recall', 'Playful', 'Good with other dogs', 'Loves fetch'],
+  temperamentTags: ['Friendly', 'Playful', 'Good with other dogs', 'Loves fetch'],
 }
+
+// The choices an owner can pick from when editing. Fixed phrases rather than free
+// text, so any two owners can compare dogs at a glance.
+export const SIZE_OPTIONS = [
+  { value: 'small', label: 'Small' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'large', label: 'Large' },
+]
+
+export const TAG_OPTIONS = [
+  'Friendly',
+  'Playful',
+  'Calm',
+  'Energetic',
+  'Good with other dogs',
+  'Good with kids',
+  'Loves fetch',
+  'Shy at first',
+  'Needs space',
+]

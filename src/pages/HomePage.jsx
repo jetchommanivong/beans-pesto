@@ -1,10 +1,12 @@
 import { Link } from 'react-router'
 import { ChevronRight, Droplet, Footprints, MapPin, PawPrint } from 'lucide-react'
 import Avatar from '../components/Avatar.jsx'
+import HomePrivacyStatus from '../components/HomePrivacyStatus.jsx'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
+import usePrivacySettings from '../hooks/usePrivacySettings.js'
+import useProfile from '../hooks/useProfile.js'
 import useUserLocation from '../hooks/useUserLocation.js'
 import { formatDistance } from '../data/brisbaneOpenData.js'
-import useProfile from '../hooks/useProfile.js'
 import { nearbyDogs } from '../data/mockData.js'
 import './HomePage.css'
 
@@ -15,6 +17,7 @@ const SEARCH_RADIUS_KM = 3
 export default function HomePage() {
   const { saved } = useProfile()
   const { location, isPrecise, status, requestLocation } = useUserLocation()
+  const { settings } = usePrivacySettings()
   const { places, status: dataStatus } = useNearbyPlaces({
     lat: location.lat,
     lon: location.lon,
@@ -25,12 +28,19 @@ export default function HomePage() {
   const nearestPark = places.find((place) => place.type === 'dogParks')
   const nearestWater = places.find((place) => place.type === 'water')
 
+  // A saved profile always holds a dog, but it may not be named yet.
+  const myDogName = saved.dogs.find((dog) => dog.name.trim())?.name.trim() ?? ''
+
   return (
     <div className="home">
       <section className="home-intro">
         <p className="home-intro__eyebrow">Good to see you!</p>
-        <h1 className="home-intro__title">{saved.owner.name ? `Ready for a walk, ${saved.owner.name}?` : 'Ready for a walk?'}</h1>
+        <h1 className="home-intro__title">
+          {saved.owner.name ? `Ready for a walk, ${saved.owner.name}?` : 'Ready for a walk?'}
+        </h1>
       </section>
+
+      <HomePrivacyStatus settings={settings} />
 
       {/* Opens the dog-park map until the walk screen (task 16) exists. */}
       <Link to="/map?filter=dogParks" className="button button--primary home-cta">
@@ -88,6 +98,20 @@ export default function HomePage() {
       <section className="home-section">
         <h2 className="home-section__title">Out walking now</h2>
         <ul className="home-dogs">
+          {settings.shareLocation && (
+            <li>
+              <Link to="/profile/privacy" className="home-dog">
+                <Avatar name={myDogName || saved.owner.name || 'You'} tone="primary" size={44} />
+                <span className="home-dog__text">
+                  <span className="home-dog__name">
+                    {myDogName ? `You and ${myDogName}` : 'You'}
+                  </span>
+                  <span className="home-dog__detail">Visible to friends while you walk</span>
+                </span>
+                <MapPin className="home-dog__pin" size={18} aria-hidden="true" />
+              </Link>
+            </li>
+          )}
           {nearbyDogs.map((dog) => (
             <li key={dog.id}>
               <Link to="/social" className="home-dog">
