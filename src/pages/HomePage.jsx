@@ -4,7 +4,8 @@ import Avatar from '../components/Avatar.jsx'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
 import useUserLocation from '../hooks/useUserLocation.js'
 import { formatDistance } from '../data/brisbaneOpenData.js'
-import { dogProfile, nearbyDogs } from '../data/mockData.js'
+import useProfile from '../hooks/useProfile.js'
+import { nearbyDogs } from '../data/mockData.js'
 import './HomePage.css'
 
 const SEARCH_RADIUS_KM = 3
@@ -12,6 +13,7 @@ const SEARCH_RADIUS_KM = 3
 // Home answers "what should I do right now?". Getting to the Map, Social and
 // Profile screens is the bottom navigation's job, so nothing here repeats it.
 export default function HomePage() {
+  const { saved } = useProfile()
   const { location, isPrecise, status, requestLocation } = useUserLocation()
   const { places, status: dataStatus } = useNearbyPlaces({
     lat: location.lat,
@@ -27,8 +29,10 @@ export default function HomePage() {
     <div className="home">
       <section className="home-intro">
         <p className="home-intro__eyebrow">Good to see you!</p>
-        <h1 className="home-intro__title">Ready for a walk, {dogProfile.name}?</h1>
+        <h1 className="home-intro__title">{saved.owner.name ? `Ready for a walk, ${saved.owner.name}?` : 'Ready for a walk?'}</h1>
       </section>
+
+      {!saved.onboardingComplete && <aside className="home-setup"><h2>Set up your profile</h2><p>Add your walking preferences and your dogs' details. You can browse without completing setup.</p><Link to="/onboarding" className="button button--secondary">Start guided setup</Link></aside>}
 
       {/* Opens the dog-park map until the walk screen (task 16) exists. */}
       <Link to="/map?filter=dogParks" className="button button--primary home-cta">

@@ -1,67 +1,27 @@
+import { useState } from 'react'
 import { Link } from 'react-router'
-import { ChevronRight, Dog, Footprints, ShieldCheck, Smile, TreePine } from 'lucide-react'
-import DogTags from '../components/DogTags.jsx'
-import FeatureCard from '../components/FeatureCard.jsx'
+import useProfile from '../hooks/useProfile.js'
+import { ChevronRight, ShieldCheck } from 'lucide-react'
 import usePrivacySettings from '../hooks/usePrivacySettings.js'
-import { dogDetails } from '../data/dogDetails.js'
-import { dogProfile } from '../data/mockData.js'
 import '../components/ListItem.css'
-import './ProfilePage.css'
 import './ProfileAccount.css'
+import { OwnerFields, DogFields, StorageNotice } from '../components/ProfileFields.jsx'
+import './ProfilePage.css'
 
 export default function ProfilePage() {
+  const { dirty, notice, saveProfile, discard } = useProfile()
   const { settings } = usePrivacySettings()
-
-  // Dog details only. Privacy is an account setting, so it is no longer a dog card.
-  const profileCards = [
-    {
-      title: 'Temperament',
-      description: dogProfile.temperament,
-      icon: Smile,
-      tone: 'accent',
-    },
-    {
-      title: 'Favourite Park',
-      description: dogProfile.favouritePark,
-      icon: TreePine,
-      tone: 'primary',
-    },
-    {
-      title: 'Walk Preferences',
-      description: dogProfile.walkPreferences,
-      icon: Footprints,
-      tone: 'water',
-    },
-  ]
-
-  return (
-    <>
-      <section className="profile-hero">
-        <div className="profile-hero__photo" aria-hidden="true">
-          <Dog size={56} strokeWidth={1.5} />
-        </div>
-        <div className="profile-hero__info">
-          <h1 className="profile-hero__name">{dogProfile.name}</h1>
-          <dl className="profile-hero__facts">
-            <div>
-              <dt>Breed</dt>
-              <dd>{dogProfile.breed}</dd>
-            </div>
-            <div>
-              <dt>Temperament</dt>
-              <dd>{dogProfile.temperament}</dd>
-            </div>
-          </dl>
-          <DogTags size={dogDetails.size} tags={dogDetails.temperamentTags} />
-        </div>
-      </section>
-
-      <div className="card-grid">
-        {profileCards.map((card) => (
-          <FeatureCard key={card.title} {...card} />
-        ))}
-      </div>
-
+  const [result, setResult] = useState(null)
+  function save(event) { event.preventDefault(); setResult(saveProfile()) }
+  return <div className="profile-editor">
+    <header className="profile-intro"><p className="profile-eyebrow">YOUR WALKING COMPANIONS</p><h1>Your profile</h1><p>Keep your walking preferences and each dog's details together.</p><Link to="/onboarding">Open guided setup</Link></header>
+    {notice && <p className="profile-notice" role="alert">{notice}</p>}
+    <form className="profile-editor" onSubmit={save} onChange={() => setResult(null)}>
+      <OwnerFields /><DogFields /><StorageNotice />
+      <p className="profile-help" role="status">{dirty ? 'Unsaved changes. Your draft stays available when you switch pages. Save before closing this app.' : 'No unsaved changes.'}</p>
+      {result && (!result.ok || !dirty) && <p role={result.ok ? 'status' : 'alert'} className={result.ok ? 'profile-success' : 'profile-error'}>{result.message}</p>}
+      <div className="profile-actions"><button className="button button--primary" type="submit">Save profile</button><button className="button button--secondary" type="button" disabled={!dirty} onClick={() => { discard(); setResult(null) }}>Discard changes</button></div>
+    </form>
       <h2 className="profile-account-title">Your account</h2>
       <Link to="/profile/privacy" className="list-item tone-primary profile-privacy">
         <ShieldCheck size={24} aria-hidden="true" />
@@ -74,6 +34,5 @@ export default function ProfilePage() {
         </span>
         <ChevronRight className="list-item__chevron" size={20} aria-hidden="true" />
       </Link>
-    </>
-  )
+  </div>
 }
