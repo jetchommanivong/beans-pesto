@@ -1,7 +1,49 @@
 // Shared content and validation for the profile editor and onboarding.
 export const PROFILE_STORAGE_KEY = 'tailmates.profile.v1'
-import { TEMPERAMENT_TAGS } from './dogDetails.js'
-export { TEMPERAMENT_TAGS }
+
+/**
+ * The temperament tags an owner can choose from.
+ *
+ * Fixed phrases rather than free text, so two owners can compare dogs at a
+ * glance instead of reading paragraphs or guessing from breed. The set is
+ * deliberately small: every tag has to be worth reading on a card, and a long
+ * list pushes people to tick everything, which tells the next owner nothing.
+ *
+ * Grouped by what an owner is actually deciding before they agree to meet, and
+ * kept in that order because the editor shows them as one flat grid:
+ *
+ *  - pace: will our walks suit each other
+ *  - other dogs: is this introduction going to go well
+ *  - off leash: can this dog be let off, which is the whole point of the parks
+ *    this app is built around
+ *  - play and people: the softer detail
+ *
+ * Some tags are deliberately unflattering. Matching is useless if every tag is
+ * positive, and "Needs space" up front prevents the meeting that goes badly.
+ * Size is not in here: it is already its own field, and the map filters on it.
+ *
+ * `id` is stored and must stay stable; `label` is only ever displayed, so it can
+ * be reworded freely.
+ */
+export const TEMPERAMENT_TAGS = [
+  // Pace
+  { id: 'calm', label: 'Calm' },
+  { id: 'energetic', label: 'Energetic' },
+  { id: 'slow-walker', label: 'Slow walker' },
+  // With other dogs
+  { id: 'good-with-dogs', label: 'Good with other dogs' },
+  { id: 'shy-with-new-dogs', label: 'Shy with new dogs' },
+  { id: 'needs-space', label: 'Needs space' },
+  { id: 'good-with-puppies', label: 'Good with puppies' },
+  // Off leash
+  { id: 'reliable-recall', label: 'Reliable recall' },
+  { id: 'learning-recall', label: 'Still learning recall' },
+  // Play and people
+  { id: 'loves-fetch', label: 'Loves fetch' },
+  { id: 'playful', label: 'Playful' },
+  { id: 'good-with-kids', label: 'Good with kids' },
+]
+
 export const TAG_LABELS = Object.fromEntries(TEMPERAMENT_TAGS.map(tag => [tag.id, tag.label]))
 export function newDogId() {
   return globalThis.crypto?.randomUUID?.() ?? `dog-${Date.now()}-${Math.random().toString(36).slice(2)}`
