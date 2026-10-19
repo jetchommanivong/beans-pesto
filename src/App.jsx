@@ -15,6 +15,9 @@ import LoadingScreen from './pages/LoadingScreen.jsx'
 import UnderConstructionPage from './pages/UnderConstructionPage.jsx'
 import useSocialState from './hooks/useSocialState.js'
 import OwnerProfilePage from './pages/OwnerProfilePage.jsx'
+import WalkProvider from './components/WalkProvider.jsx'
+import WalkPage from './pages/WalkPage.jsx'
+import WalkDetailPage from './pages/WalkDetailPage.jsx'
 
 // How long the splash screen shows when the app first opens.
 const LOADING_DURATION_MS = 1200
@@ -44,6 +47,7 @@ export default function App() {
   return (
     <LocationProvider>
       <ProfileProvider>
+      <WalkProvider onOpenChat={social.openChat}>
       <Routes>
         {/* Main screens: header + bottom navigation */}
         <Route element={<AppLayout />}>
@@ -60,10 +64,13 @@ export default function App() {
           <Route path="profile/privacy" element={<AccountPrivacyPage />} />
           <Route path="social/chat/:chatId" element={<ChatPage onOpenChat={social.openChat} />} />
           <Route path="social/people/:ownerId" element={<OwnerProfilePage followedIds={social.followedIds} toggleFollow={social.toggleFollow} />} />
+          <Route path="walk" element={<WalkPage />} />
+          <Route path="walks/:walkId" element={<WalkDetailPage followingOwnerIds={social.followedIds} />} />
           {/* Only reached by a mistyped address; nothing in the app links here. */}
           <Route path="*" element={<UnderConstructionPage />} />
         </Route>
       </Routes>
+      </WalkProvider>
       </ProfileProvider>
     </LocationProvider>
   )

@@ -44,6 +44,39 @@ Dogs out walking are still placeholder data in `mockData.js`.
 Each component has a matching `.css` file next to it. Routes are set up in `src/App.jsx`.
 Links to screens that aren't built yet go to `/coming-soon`.
 
+## Recording and sharing walks
+
+Home's **Start a walk** opens a dedicated route map and asks the browser for
+precise location. Use HTTPS or localhost, allow location access, and keep the
+app visible with the screen awake. This is a browser recorder, so it pauses
+when the app goes into the background. It does not track with the screen locked.
+Where supported, a screen wake lock keeps the display on during recording and
+is released when recording stops or pauses.
+
+You can pause, resume, finish, or discard a recording. GPS fixes with accuracy
+worse than 75 metres and implausible jumps are ignored; pauses and long gaps
+are separate route segments. Distances are estimates from the accepted GPS
+fixes. An unfinished route is saved as you walk and recovered **paused** after
+a refresh, without adding time while the app was closed.
+
+On finishing, choose **Private** (the default) or **Followers**. Your profile's
+walk history opens each route on its map, and **Preview follower view** shows
+only follower-visible walks. You can change visibility or delete a saved walk.
+Sharing a route in a DM or group chat grants that conversation access while
+keeping a private walk out of the profile's follower view. **Stop sharing in
+chats** revokes those route links; deleting a walk also removes access from
+previously shared messages. Chat messages reference the walk rather than
+embedding copies of its coordinates.
+
+This remains a local prototype: recordings, follower visibility, and chat
+shares live in this browser's storage. They are not sent to real accounts or
+other devices, and profile previews are not server-enforced access control.
+Storage errors are surfaced before claiming a walk was saved or shared.
+
+Run `npm test` for the walk lifecycle, GPS filtering, recovery, privacy, route
+sharing, and existing social checks. Device GPS and map interactions still
+need a browser/phone check.
+
 ## Deploying to the team web space
 
 ```bash

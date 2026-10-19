@@ -6,6 +6,7 @@ import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
 import usePrivacySettings from '../hooks/usePrivacySettings.js'
 import useProfile from '../hooks/useProfile.js'
 import useUserLocation from '../hooks/useUserLocation.js'
+import useWalks from '../hooks/useWalks.js'
 import { formatDistance } from '../data/brisbaneOpenData.js'
 import { nearbyDogs } from '../data/mockData.js'
 import './HomePage.css'
@@ -15,6 +16,7 @@ const SEARCH_RADIUS_KM = 3
 // Home answers "what should I do right now?". Getting to the Map, Social and
 // Profile screens is the bottom navigation's job, so nothing here repeats it.
 export default function HomePage() {
+  const { draft: activeWalk, start: startWalk } = useWalks()
   const { saved } = useProfile()
   const { location, isPrecise, status, requestLocation } = useUserLocation()
   const { settings } = usePrivacySettings()
@@ -42,10 +44,9 @@ export default function HomePage() {
 
       <HomePrivacyStatus settings={settings} />
 
-      {/* Opens the dog-park map until the walk screen (task 16) exists. */}
-      <Link to="/map?filter=dogParks" className="button button--primary home-cta">
+      <Link to="/walk" onClick={startWalk} className="button button--primary home-cta">
         <Footprints size={20} aria-hidden="true" />
-        Start a walk
+        {activeWalk ? 'Return to your walk' : 'Start a walk'}
       </Link>
 
       {!isPrecise && (
