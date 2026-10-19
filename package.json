@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
+    "test:social": "node --test tests/social.test.js",
     "preview": "vite preview"
   },
   "dependencies": {
