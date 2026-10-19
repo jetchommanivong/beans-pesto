@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { Pencil, ShieldCheck } from 'lucide-react'
 import ProfileDetails from '../components/ProfileDetails.jsx'
 import useProfile from '../hooks/useProfile.js'
+import WalkHistory from '../components/WalkHistory.jsx'
 import './ProfilePage.css'
 import './ProfileOverview.css'
 
@@ -39,7 +40,8 @@ export default function ProfilePage() {
         </section>
       ) : <ProfileDetails profile={saved} />}
 
-      <p className="profile-help">Your details and photos stay on this browser and aren't shown to other people.</p>
+      <WalkHistory />
+      <p className="profile-help">Your details, photos and walks are saved on this browser.</p>
     </div>
   )
 }

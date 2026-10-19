@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Link, useParams } from 'react-router'
 import { Check, Send, UserPlus } from 'lucide-react'
 import ProfileDetails from '../components/ProfileDetails.jsx'
+import WalkHistory from '../components/WalkHistory.jsx'
 import { getOwnerProfile, owners } from '../data/mockData.js'
 
 export default function OwnerProfilePage({ followedIds, toggleFollow }) {
@@ -40,6 +41,7 @@ export default function OwnerProfilePage({ followedIds, toggleFollow }) {
         </Link>
       </div>
       <ProfileDetails profile={getOwnerProfile(person)} dogsTitle="Dogs" />
+      <WalkHistory ownerId={person.id} followingOwnerIds={followedIds} />
     </div>
   )
 }

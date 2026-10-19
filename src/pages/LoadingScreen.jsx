@@ -4,7 +4,7 @@ import './LoadingScreen.css'
 
 export default function LoadingScreen({ progress }) {
   return (
-    <AppLayout showNav={false}>
+    <AppLayout showNav={false} showWalkBanner={false}>
       <div className="loading">
         <div className="loading__art" aria-hidden="true">
           <Dog size={80} strokeWidth={1.5} />

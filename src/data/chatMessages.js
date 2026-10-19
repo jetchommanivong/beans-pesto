@@ -11,6 +11,7 @@ export function loadMessages(chatId, storage) {
       (message.createdAt == null || (Number.isFinite(message.createdAt) && message.createdAt >= 0)) &&
       message.from === 'me' && (
         (message.type === 'text' && typeof message.text === 'string') ||
+        (message.type === 'walk' && typeof message.walkId === 'string' && message.walkId.length > 0) ||
         (message.type === 'pin' && typeof message.placeId === 'string' &&
           typeof message.placeName === 'string' && typeof message.time === 'string')
       ),
@@ -23,8 +24,10 @@ export function loadMessages(chatId, storage) {
 export function saveMessages(chatId, messages, storage) {
   try {
     (storage ?? localStorage).setItem(`tailmates.chat.${chatId}`, JSON.stringify(messages))
+    return true
   } catch {
     // The conversation still works for this visit if storage is unavailable.
+    return false
   }
 }
 
@@ -33,7 +36,7 @@ export function getChatSummary(chat, storage) {
   const lastActivityAt = last?.createdAt
     ?? (typeof last?.id === 'number' && last.id > 1e12 ? last.id : chat.lastActivityAt ?? 0)
   if (!last) return { subtitle: chat.subtitle, time: chat.time, lastActivityAt }
-  const text = last.type === 'pin' ? `Meet-up at ${last.placeName}` : last.text
+  const text = last.type === 'pin' ? `Meet-up at ${last.placeName}` : last.type === 'walk' ? 'Shared a walk route' : last.text
   return {
     subtitle: last.from === 'me' ? `You: ${text}` : text,
     time: last.sentAt ?? chat.time,

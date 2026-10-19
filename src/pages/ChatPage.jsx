@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useHref, useParams } from 'react-router'
-import { CalendarClock, Check, ChevronRight, Copy, MapPin, Send } from 'lucide-react'
+import { CalendarClock, Check, ChevronRight, Copy, Footprints, MapPin, Send } from 'lucide-react'
 import Avatar from '../components/Avatar.jsx'
 import ChatAvatar from '../components/ChatAvatar.jsx'
 import ListItem from '../components/ListItem.jsx'
 import OwnerListItem from '../components/OwnerListItem.jsx'
+import { WalkRoutePicker } from '../components/WalkSharePicker.jsx'
+import useWalks from '../hooks/useWalks.js'
+import { formatWalkDistance, formatWalkDuration, walkDistance } from '../data/walkData.js'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
 import useUserLocation from '../hooks/useUserLocation.js'
 import { formatDistance } from '../data/brisbaneOpenData.js'
@@ -34,6 +37,8 @@ function ChatScreen({ chat, onOpenChat }) {
   const [messages, setMessages] = useState(() => loadMessages(chat.id))
   const [draft, setDraft] = useState('')
   const [pinning, setPinning] = useState(false)
+  const [sharingWalk, setSharingWalk] = useState(false)
+  const { shareWalk } = useWalks()
   const chatRef = useRef(null)
   const controlsRef = useRef(null)
 
@@ -117,6 +122,8 @@ function ChatScreen({ chat, onOpenChat }) {
         {[...chat.messages, ...messages].map((message) =>
           message.type === 'pin' ? (
             <PinMessage key={message.id} pin={message} />
+          ) : message.type === 'walk' ? (
+            <WalkMessage key={message.id} message={message} chatId={chat.id} />
           ) : (
             <TextMessage key={message.id} message={message} isGroup={chat.isGroup} />
           ),
@@ -125,7 +132,14 @@ function ChatScreen({ chat, onOpenChat }) {
 
       <div className="chat__controls" ref={controlsRef}>
         <div className="chat__pin-tools">
-          {pinning ? (
+          {sharingWalk ? (
+            <WalkRoutePicker onCancel={() => setSharingWalk(false)} onSend={(walkId) => {
+              if (shareWalk(walkId, chat.id)) {
+                setMessages(loadMessages(chat.id))
+                setSharingWalk(false)
+              }
+            }} />
+          ) : pinning ? (
             <PinComposer
               onCancel={() => setPinning(false)}
               onSend={(pin) => {
@@ -134,14 +148,19 @@ function ChatScreen({ chat, onOpenChat }) {
               }}
             />
           ) : (
-            <button
-              type="button"
-              className="button button--secondary chat__pin-button"
-              onClick={() => setPinning(true)}
-            >
-              <MapPin size={18} aria-hidden="true" />
-              Share a meet-up pin
-            </button>
+            <div className="chat__attachment-buttons">
+              <button
+                type="button"
+                className="button button--secondary chat__pin-button"
+                onClick={() => setPinning(true)}
+              >
+                <MapPin size={18} aria-hidden="true" />
+                Meet-up pin
+              </button>
+              <button type="button" className="button button--secondary" onClick={() => setSharingWalk(true)}>
+                <Footprints size={18} aria-hidden="true" />Share a walk
+              </button>
+            </div>
           )}
         </div>
 
@@ -177,6 +196,20 @@ function TextMessage({ message, isGroup }) {
       )}
       <p>{message.text}</p>
       {time && <span className="bubble__time">{time}</span>}
+    </li>
+  )
+}
+
+function WalkMessage({ message, chatId }) {
+  const { walks } = useWalks()
+  const walk = walks.find((item) => item.id === message.walkId && item.sharedChatIds.includes(chatId))
+  if (!walk) return <li className="bubble bubble--me">This walk is no longer available.</li>
+  return (
+    <li className="pin tone-primary">
+      <p className="pin__label">Walk route</p>
+      <p className="walk-message__title"><Footprints size={18} aria-hidden="true" />{walk.title}</p>
+      <p className="walk-message__meta">{formatWalkDistance(walkDistance(walk.points))} · {formatWalkDuration(walk.elapsedMs)}</p>
+      <Link to={`/walks/${walk.id}?chat=${encodeURIComponent(chatId)}`} className="button button--primary button--small">View route</Link>
     </li>
   )
 }
