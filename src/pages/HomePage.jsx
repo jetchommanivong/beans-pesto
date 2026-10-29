@@ -1,14 +1,12 @@
 import { Link } from 'react-router'
 import { ChevronRight, Droplet, MapPin, PawPrint } from 'lucide-react'
 import WalkPage from './WalkPage.jsx'
-import LiveLocationControl from '../components/LiveLocationControl.jsx'
 import Avatar from '../components/Avatar.jsx'
 import HomePrivacyStatus from '../components/HomePrivacyStatus.jsx'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
 import usePrivacySettings from '../hooks/usePrivacySettings.js'
 import useProfile from '../hooks/useProfile.js'
 import useUserLocation from '../hooks/useUserLocation.js'
-import useWalks from '../hooks/useWalks.js'
 import { formatDistance } from '../data/brisbaneOpenData.js'
 import { nearbyDogs } from '../data/mockData.js'
 import './HomePage.css'
@@ -18,7 +16,6 @@ const SEARCH_RADIUS_KM = 3
 // Home answers "what should I do right now?". Getting to the Map, Social and
 // Profile screens is the bottom navigation's job, so nothing here repeats it.
 export default function HomePage() {
-  const { sharingActive } = useWalks()
   const { saved } = useProfile()
   const { location, isPrecise, status, requestLocation } = useUserLocation()
   const { settings } = usePrivacySettings()
@@ -32,9 +29,6 @@ export default function HomePage() {
   const nearestPark = places.find((place) => place.type === 'dogParks')
   const nearestWater = places.find((place) => place.type === 'water')
 
-  // A saved profile always holds a dog, but it may not be named yet.
-  const myDogName = saved.dogs.find((dog) => dog.name.trim())?.name.trim() ?? ''
-
   return (
     <div className="home">
       <section className="home-intro">
@@ -47,7 +41,6 @@ export default function HomePage() {
       <HomePrivacyStatus settings={settings} />
 
       <WalkPage openMapOnStart />
-      <LiveLocationControl />
 
       {!isPrecise && (
         <p className="home-location">
@@ -99,20 +92,6 @@ export default function HomePage() {
       <section className="home-section">
         <h2 className="home-section__title">Nearby now</h2>
         <ul className="home-dogs">
-          {sharingActive && (
-            <li>
-              <Link to="/map" className="home-dog">
-                <Avatar name={myDogName || saved.owner.name || 'You'} tone="primary" size={44} />
-                <span className="home-dog__text">
-                  <span className="home-dog__name">
-                    {myDogName ? `You and ${myDogName}` : 'You'}
-                  </span>
-                  <span className="home-dog__detail">Sharing live location</span>
-                </span>
-                <MapPin className="home-dog__pin" size={18} aria-hidden="true" />
-              </Link>
-            </li>
-          )}
           {nearbyDogs.map((dog) => (
             <li key={dog.id}>
               <Link to="/social" className="home-dog">

@@ -1,13 +1,12 @@
 ﻿import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router'
-import { Footprints, MapPin, Route } from 'lucide-react'
+import { Footprints, Route } from 'lucide-react'
 import useWalks from '../hooks/useWalks.js'
 import WalkPage from '../pages/WalkPage.jsx'
-import LiveLocationControl from './LiveLocationControl.jsx'
 import './Walks.css'
 
 export default function ActiveWalkBanner() {
-  const { draft, sharingActive } = useWalks()
+  const { draft } = useWalks()
   const controlsRef = useRef(null)
   const location = useLocation()
   const walkStatus = !draft ? 'No active walk' : draft.phase === 'recording' ? 'Walking' : draft.phase === 'paused' ? 'Walk paused' : 'Walk ready to save'
@@ -42,13 +41,6 @@ export default function ActiveWalkBanner() {
         {draft?.recordRoute && <Route size={16} aria-hidden="true" />}
       </summary>
       <div className="header-walk__dropdown" onClick={closeOnLink}><WalkPage /></div>
-    </details>
-    <details className="header-live" name="header-controls">
-      <summary className={`header-walk__indicator header-live__indicator${sharingActive ? ' header-live__indicator--on' : ''}`} aria-label={sharingActive ? 'Live location: sharing with friends' : 'Live location: off'} title="Live location">
-        <MapPin size={18} aria-hidden="true" />
-        {sharingActive && <span className="live-location-dot" />}
-      </summary>
-      <div className="header-walk__dropdown" onClick={closeOnLink}><LiveLocationControl /></div>
     </details>
   </div>
 }

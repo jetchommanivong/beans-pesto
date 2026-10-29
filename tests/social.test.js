@@ -16,7 +16,8 @@ let useSocialState
 let WalkPage
 let WalkDetailPage
 let WalkHistory
-let LiveLocationControl
+let AccountPrivacyPage
+let ActiveWalkBanner
 let walkContext
 let WalkContext
 let ProfileContext
@@ -38,7 +39,8 @@ before(async () => {
   WalkPage = (await server.ssrLoadModule('/src/pages/WalkPage.jsx')).default
   WalkDetailPage = (await server.ssrLoadModule('/src/pages/WalkDetailPage.jsx')).default
   WalkHistory = (await server.ssrLoadModule('/src/components/WalkHistory.jsx')).default
-  LiveLocationControl = (await server.ssrLoadModule('/src/components/LiveLocationControl.jsx')).default
+  AccountPrivacyPage = (await server.ssrLoadModule('/src/pages/AccountPrivacyPage.jsx')).default
+  ActiveWalkBanner = (await server.ssrLoadModule('/src/components/ActiveWalkBanner.jsx')).default
   LoadingScreen = (await server.ssrLoadModule('/src/pages/LoadingScreen.jsx')).default
 })
 
@@ -298,7 +300,7 @@ test('walk review defaults to private and asks before saving or publishing', () 
   assert.ok(!html.includes('Publish to followers'))
 })
 
-test('route recording has a switch and live sharing is separate from walk controls', () => {
+test('route recording remains available without live location sharing', () => {
   const html = renderRoute('/map', '/map', WalkPage)
   assert.ok(html.includes('Record route'))
   assert.ok(!html.includes('Live location'))
@@ -306,17 +308,18 @@ test('route recording has a switch and live sharing is separate from walk contro
   assert.ok(html.includes('Start walk'))
 })
 
-test('friends-only live sharing is permission gated and available without a walk', () => {
-  const locked = renderRoute('/', '/', LiveLocationControl)
-  assert.ok(locked.includes('Friends only'))
-  assert.ok(locked.includes('href="/profile/privacy"'))
-  assert.ok(!locked.includes('Share with friends'))
-  localStorage.setItem('tailmates.privacy', JSON.stringify({ shareLocation: true }))
-  const allowed = renderRoute('/', '/', LiveLocationControl)
-  assert.ok(allowed.includes('Share with friends'))
-  assert.ok(!allowed.includes('Stop sharing'))
-  walkContext.sharingActive = true
-  assert.ok(renderRoute('/', '/', LiveLocationControl).includes('Stop sharing'))
+test('legacy live-sharing settings do not restore its controls; pins still work', () => {
+  localStorage.setItem('tailmates.privacy', JSON.stringify({ shareLocation: true, suggestToOthers: true }))
+  const privacy = renderRoute('/profile/privacy', '/profile/privacy', AccountPrivacyPage)
+  assert.ok(privacy.includes('Suggest me to others'))
+  assert.ok(!privacy.includes('live location'))
+  assert.equal((privacy.match(/role="switch"/g) ?? []).length, 1)
+  const header = renderRoute('/', '/', ActiveWalkBanner)
+  assert.ok(header.includes('header-walk'))
+  assert.ok(!header.includes('Live location'))
+  assert.ok(!header.includes('header-live'))
+  const chat = renderRoute('/social/chat/chat-sam', '/social/chat/:chatId', ChatPage, { onOpenChat: noop })
+  assert.ok(chat.includes('Meet-up pin'))
 })
 
 test('a walk without recording shows a timer and finish controls without route-saving options', () => {

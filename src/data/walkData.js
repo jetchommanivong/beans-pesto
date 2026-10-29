@@ -116,7 +116,7 @@ export function readWalkStore(storage, now = Date.now()) {
       (draft.phase === 'review' && !Number.isFinite(draft.endedAt)))) draft = null
     if (draft) {
       draft = { ...draft, recordRoute: draft.recordRoute !== false }
-      delete draft.shareLocation // Live sharing is now independent of walks.
+      delete draft.shareLocation // Remove the legacy sharing preference.
     }
     if (draft?.phase === 'recording') {
       // Only count time up to the last saved fix; never count time while closed.

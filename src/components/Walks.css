@@ -77,9 +77,6 @@
 .header-walk__dropdown { position: absolute; top: calc(100% + 12px); left: 12px; right: 12px; z-index: 2; max-height: 75dvh; overflow-y: auto; border: 1px solid #bdb3a5; border-radius: var(--radius-lg); background: var(--color-surface); box-shadow: 0 18px 48px rgb(43 42 40 / 30%), 0 3px 10px rgb(43 42 40 / 18%); }
 .header-walk__dropdown .walk-panel { border: 0; }
 .header-walk__dropdown .walk-heading { padding-bottom: 12px; border-bottom: 1px solid var(--color-border); }
-.header-live__indicator { position: relative; min-width: 40px; border-color: var(--color-border); background: var(--color-surface); color: var(--color-text-muted); }
-.header-live__indicator--on { border-color: var(--color-primary); background: var(--color-primary-soft); color: var(--color-primary); }
-.live-location-dot { position: absolute; right: 5px; top: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--color-primary); }
 .walk-preview { display: flex; align-items: center; gap: 8px; color: var(--color-primary); font-size: .85rem; font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .walk-record-toggle { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 72px; padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-bg); color: var(--color-text); text-align: left; font: inherit; cursor: pointer; }
@@ -97,13 +94,6 @@
 .walk-button--danger:hover { background: #7d3028; }
 .walk-button--danger-soft:hover { background: #f3dfda; }
 .walk-confirm { background: #faeeeb; border-color: #e7c4bd; }
-.live-location { display: grid; gap: 12px; }
-.live-location h2 { font-size: 1rem; }
-.live-location__heading { display: flex; align-items: center; gap: 10px; }
-.live-location__heading > div { flex: 1; }
-.live-location__heading p, .live-location > .walk-note { display: flex; align-items: center; gap: 5px; color: var(--color-text-muted); font-size: .78rem; }
-.live-location__heading p { margin-top: 4px; }
-.walk-feature-icon--live { background: var(--color-primary); color: #fff; }
 .walk-save .walk-privacy label:has(input[value='private']) { background: #f5f0e9; color: #665b4d; border-color: #cfc4b6; }
 .walk-save .walk-privacy label:has(input[value='private']:checked) { background: #665b4d; color: #fff; font-weight: 600; }
 .walk-save .walk-privacy label:has(input[value='followers']) { background: var(--color-water-soft); color: var(--color-water); border-color: #adc9df; }

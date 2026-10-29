@@ -1,14 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { WalkContext } from '../context/walkContext.js'
-import usePrivacySettings from '../hooks/usePrivacySettings.js'
 import {
   acceptPosition, createWalkDraft, finishWalk, readWalkStore,
   resumeDraft, stopDraft, watchWalkPosition, writeWalkStore,
 } from '../data/walkData.js'
 
 export default function WalkProvider({ children }) {
-  const { settings } = usePrivacySettings()
-  const [liveSharing, setLiveSharingState] = useState(false)
   const [initial] = useState(readWalkStore)
   const [store, setStore] = useState(initial)
   const current = useRef(initial)
@@ -55,12 +52,6 @@ export default function WalkProvider({ children }) {
     // Recording is controlled only by the draft phase, not every arriving fix.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.draft?.id, store.draft?.phase, store.draft?.recordRoute])
-
-  useEffect(() => {
-    // Revoking permission also clears the session's live-sharing choice.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (!settings.shareLocation) setLiveSharingState(false)
-  }, [settings.shareLocation])
 
   useEffect(() => {
     if (store.draft?.phase !== 'recording' || !navigator.wakeLock) return
@@ -137,10 +128,6 @@ export default function WalkProvider({ children }) {
     if (state.draft) commit({ ...state, draft: state.draft.recordRoute || state.draft.points.length ? stopDraft(state.draft, 'review') : null }, false)
   }
 
-  function setLiveSharing(value) {
-    setLiveSharingState(Boolean(value && settings.shareLocation))
-  }
-
   function setRecording(value) {
     const state = current.current
     if (!state.draft || state.draft.phase === 'review') return
@@ -177,8 +164,7 @@ export default function WalkProvider({ children }) {
   }
 
   return <WalkContext.Provider value={{
-    ...store, notice, gps, screenAwake, start, pause, resume, finish, save, discard, setLiveSharing, setRecording,
-    sharingActive: Boolean(settings.shareLocation && liveSharing),
+    ...store, notice, gps, screenAwake, start, pause, resume, finish, save, discard, setRecording,
     deleteWalk, changeVisibility,
   }}>{children}</WalkContext.Provider>
 }
