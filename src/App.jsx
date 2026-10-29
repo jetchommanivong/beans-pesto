@@ -18,6 +18,7 @@ import OwnerProfilePage from './pages/OwnerProfilePage.jsx'
 import WalkProvider from './components/WalkProvider.jsx'
 import WalkPage from './pages/WalkPage.jsx'
 import WalkDetailPage from './pages/WalkDetailPage.jsx'
+import AboutPage from './pages/AboutPage.jsx'
 
 // How long the splash screen shows when the app first opens.
 const LOADING_DURATION_MS = 1200
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="social/chat/:chatId" element={<ChatPage onOpenChat={social.openChat} />} />
           <Route path="social/people/:ownerId" element={<OwnerProfilePage followedIds={social.followedIds} toggleFollow={social.toggleFollow} />} />
           <Route path="walk" element={<WalkPage />} />
+          <Route path="about" element={<AboutPage />} />
           <Route path="walks/:walkId" element={<WalkDetailPage followingOwnerIds={social.followedIds} />} />
           {/* Only reached by a mistyped address; nothing in the app links here. */}
           <Route path="*" element={<UnderConstructionPage />} />
