@@ -14,6 +14,10 @@ export default function AboutPage() {
       <h1>About Tail Mates</h1>
       <p>Find dog-friendly places, record your walks and connect with other dog owners.</p>
     </header>
+    <section className="about-section" aria-labelledby="about-team">
+      <h2 id="about-team">The team</h2>
+      <p>Vairavan, Will, Daniel, Misri and Jet.</p>
+    </section>
     <section className="about-section" aria-labelledby="about-data">
       <h2 id="about-data">Data sources</h2>
       <p>Park, dog park and drinking-water locations come from Brisbane City Council's open data portal.</p>
