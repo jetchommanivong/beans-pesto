@@ -1,5 +1,7 @@
 import { Link } from 'react-router'
-import { ChevronRight, Droplet, Footprints, MapPin, PawPrint } from 'lucide-react'
+import { ChevronRight, Droplet, MapPin, PawPrint } from 'lucide-react'
+import WalkPage from './WalkPage.jsx'
+import LiveLocationControl from '../components/LiveLocationControl.jsx'
 import Avatar from '../components/Avatar.jsx'
 import HomePrivacyStatus from '../components/HomePrivacyStatus.jsx'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
@@ -16,7 +18,7 @@ const SEARCH_RADIUS_KM = 3
 // Home answers "what should I do right now?". Getting to the Map, Social and
 // Profile screens is the bottom navigation's job, so nothing here repeats it.
 export default function HomePage() {
-  const { draft: activeWalk, start: startWalk } = useWalks()
+  const { sharingActive } = useWalks()
   const { saved } = useProfile()
   const { location, isPrecise, status, requestLocation } = useUserLocation()
   const { settings } = usePrivacySettings()
@@ -44,10 +46,8 @@ export default function HomePage() {
 
       <HomePrivacyStatus settings={settings} />
 
-      <Link to="/walk" onClick={startWalk} className="button button--primary home-cta">
-        <Footprints size={20} aria-hidden="true" />
-        {activeWalk ? 'Return to your walk' : 'Start a walk'}
-      </Link>
+      <WalkPage openMapOnStart />
+      <LiveLocationControl />
 
       {!isPrecise && (
         <p className="home-location">
@@ -97,17 +97,17 @@ export default function HomePage() {
       )}
 
       <section className="home-section">
-        <h2 className="home-section__title">Out walking now</h2>
+        <h2 className="home-section__title">Nearby now</h2>
         <ul className="home-dogs">
-          {settings.shareLocation && (
+          {sharingActive && (
             <li>
-              <Link to="/profile/privacy" className="home-dog">
+              <Link to="/map" className="home-dog">
                 <Avatar name={myDogName || saved.owner.name || 'You'} tone="primary" size={44} />
                 <span className="home-dog__text">
                   <span className="home-dog__name">
                     {myDogName ? `You and ${myDogName}` : 'You'}
                   </span>
-                  <span className="home-dog__detail">Visible to friends while you walk</span>
+                  <span className="home-dog__detail">Sharing live location</span>
                 </span>
                 <MapPin className="home-dog__pin" size={18} aria-hidden="true" />
               </Link>

@@ -1,4 +1,4 @@
-import { allChats, owners } from './mockData.js'
+import { allChats, getDogNames, owners } from './mockData.js'
 
 // Saved messages are appended to the sample conversation, so seeds never duplicate.
 export function loadMessages(chatId, storage) {
@@ -55,7 +55,7 @@ export function getConversations(chatIds, { filter = 'all', query = '', startedA
     .filter((chat) => filter === 'all' || (filter === 'groups' ? chat.isGroup : !chat.isGroup))
     .filter((chat) => {
       const members = owners.filter((person) => chat.memberIds?.includes(person.id) || person.id === chat.ownerId)
-      return [chat.name, chat.subtitle, ...members.map((person) => person.name)].join(' ').toLocaleLowerCase().includes(search)
+      return [chat.name, chat.subtitle, ...(chat.dogNames ?? []), ...members.flatMap((person) => [person.name, ...getDogNames(person)])].join(' ').toLocaleLowerCase().includes(search)
     })
     .sort((a, b) => b.lastActivityAt - a.lastActivityAt || a.name.localeCompare(b.name))
 }

@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { WalkContext } from '../context/walkContext.js'
-import { allChats } from '../data/mockData.js'
-import { loadMessages, saveMessages } from '../data/chatMessages.js'
+import usePrivacySettings from '../hooks/usePrivacySettings.js'
 import {
-  acceptPosition, createWalkDraft, finishWalk, newWalkId, readWalkStore,
-  MAX_GPS_ACCURACY, resumeDraft, stopDraft, watchWalkPosition, writeWalkStore,
+  acceptPosition, createWalkDraft, finishWalk, readWalkStore,
+  resumeDraft, stopDraft, watchWalkPosition, writeWalkStore,
 } from '../data/walkData.js'
 
-export default function WalkProvider({ children, onOpenChat }) {
+export default function WalkProvider({ children }) {
+  const { settings } = usePrivacySettings()
+  const [liveSharing, setLiveSharingState] = useState(false)
   const [initial] = useState(readWalkStore)
   const [store, setStore] = useState(initial)
   const current = useRef(initial)
@@ -31,30 +32,35 @@ export default function WalkProvider({ children, onOpenChat }) {
   // The provider stays mounted across navigation. Reloaded drafts need an
   // explicit Resume; GPS is never started just by opening the app.
   useEffect(() => {
-    if (store.draft?.phase !== 'recording') return
+    if (store.draft?.phase !== 'recording' || !store.draft.recordRoute) return
     const geolocation = navigator.geolocation
     if (!geolocation) return
     return watchWalkPosition(geolocation, (position) => {
       const state = current.current
-      if (state.draft?.phase !== 'recording') return
+      if (state.draft?.phase !== 'recording' || !state.draft.recordRoute) return
       const accuracy = position.coords.accuracy
       setGps({
-        status: accuracy > MAX_GPS_ACCURACY ? 'weak' : 'tracking', accuracy,
-        message: accuracy > MAX_GPS_ACCURACY ? 'GPS is too approximate. Waiting for a clearer signal before adding to your route.' : '',
+        status: 'tracking', accuracy, message: '',
       })
       const point = acceptPosition(state.draft, position)
       if (point) commit({ ...state, draft: { ...state.draft, segment: point.segment, points: [...state.draft.points, point] } }, false)
     }, (error) => {
       const state = current.current
-      if (state.draft?.phase !== 'recording') return
+      if (state.draft?.phase !== 'recording' || !state.draft.recordRoute) return
       setGps({ status: 'error', accuracy: null, message: error.code === 1
-        ? 'Location access was denied. Allow location in your browser, then resume your walk.'
-        : 'GPS signal lost. The recorder is waiting for your location; missing sections will not be joined together.' })
-      if (error.code === 1) commit({ ...state, draft: stopDraft(state.draft, 'paused') }, false)
+        ? 'Location access is blocked. Allow it in your browser, then resume.'
+        : error.code === 3 ? 'Location timed out. Route recording is waiting for GPS.' : 'Location is unavailable. Route recording is waiting for GPS.' })
+      if (error.code === 1) commit({ ...state, draft: { ...stopDraft(state.draft, 'paused'), pauseReason: 'location-denied' } }, false)
     })
     // Recording is controlled only by the draft phase, not every arriving fix.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [store.draft?.id, store.draft?.phase])
+  }, [store.draft?.id, store.draft?.phase, store.draft?.recordRoute])
+
+  useEffect(() => {
+    // Revoking permission also clears the session's live-sharing choice.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!settings.shareLocation) setLiveSharingState(false)
+  }, [settings.shareLocation])
 
   useEffect(() => {
     if (store.draft?.phase !== 'recording' || !navigator.wakeLock) return
@@ -81,8 +87,8 @@ export default function WalkProvider({ children, onOpenChat }) {
     const handleHidden = () => {
       const state = current.current
       if (document.visibilityState !== 'hidden' || state.draft?.phase !== 'recording') return
-      commit({ ...state, draft: stopDraft(state.draft, 'paused') }, false)
-      setGps({ status: 'idle', accuracy: null, message: 'Your walk paused while the app was in the background. Resume when you are ready.' })
+      commit({ ...state, draft: { ...stopDraft(state.draft, 'paused'), pauseReason: 'background' } }, false)
+      setGps({ status: 'idle', accuracy: null, message: 'Walk paused while the app was in the background.' })
     }
     document.addEventListener('visibilitychange', handleHidden)
     return () => document.removeEventListener('visibilitychange', handleHidden)
@@ -90,7 +96,7 @@ export default function WalkProvider({ children, onOpenChat }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function start() {
+  function start({ recordRoute = false } = {}) {
     if (current.current.draft) return true
     if (current.current.notice) {
       const restored = readWalkStore()
@@ -99,12 +105,12 @@ export default function WalkProvider({ children, onOpenChat }) {
       setStore(restored)
       if (restored.draft) return true
     }
-    if (!globalThis.isSecureContext || !navigator.geolocation) {
+    if (recordRoute && (!globalThis.isSecureContext || !navigator.geolocation)) {
       setNotice('Walk recording needs location access on HTTPS or localhost. Open the app securely and try again.')
       return false
     }
-    setGps({ status: 'waiting', accuracy: null, message: 'Finding your location…' })
-    return commit({ ...current.current, draft: createWalkDraft() })
+    setGps({ status: recordRoute ? 'waiting' : 'idle', accuracy: null, message: '' })
+    return commit({ ...current.current, draft: createWalkDraft(Date.now(), { recordRoute }) })
   }
 
   function pause() {
@@ -118,17 +124,34 @@ export default function WalkProvider({ children, onOpenChat }) {
   function resume() {
     const state = current.current
     if (!state.draft || state.draft.phase === 'recording') return
-    if (!globalThis.isSecureContext || !navigator.geolocation) {
+    if (state.draft.recordRoute && (!globalThis.isSecureContext || !navigator.geolocation)) {
       setNotice('Location is unavailable. Use HTTPS or localhost and allow location access before resuming.')
       return
     }
-    setGps({ status: 'waiting', accuracy: null, message: 'Finding your location…' })
+    setGps({ status: state.draft.recordRoute ? 'waiting' : 'idle', accuracy: null, message: '' })
     commit({ ...state, draft: resumeDraft(state.draft) }, false)
   }
 
   function finish() {
     const state = current.current
-    if (state.draft) commit({ ...state, draft: stopDraft(state.draft, 'review') }, false)
+    if (state.draft) commit({ ...state, draft: state.draft.recordRoute || state.draft.points.length ? stopDraft(state.draft, 'review') : null }, false)
+  }
+
+  function setLiveSharing(value) {
+    setLiveSharingState(Boolean(value && settings.shareLocation))
+  }
+
+  function setRecording(value) {
+    const state = current.current
+    if (!state.draft || state.draft.phase === 'review') return
+    if (value && (!globalThis.isSecureContext || !navigator.geolocation)) {
+      setNotice('Allow browser location access to record your route.')
+      return
+    }
+    setGps({ status: value ? 'waiting' : 'idle', accuracy: null, message: '' })
+    commit({ ...state, draft: { ...state.draft, recordRoute: value, segment: state.draft.segment + 1,
+      pauseReason: !value && state.draft.pauseReason === 'location-denied' ? 'manual' : state.draft.pauseReason,
+    } }, false)
   }
 
   function save(title, visibility) {
@@ -153,40 +176,9 @@ export default function WalkProvider({ children, onOpenChat }) {
     return commit({ ...current.current, walks: current.current.walks.map((walk) => walk.id === id && walk.ownerId === 'me' ? { ...walk, visibility } : walk) })
   }
 
-  function revokeShares(id) {
-    return commit({ ...current.current, walks: current.current.walks.map((walk) => walk.id === id && walk.ownerId === 'me' ? { ...walk, sharedChatIds: [] } : walk) })
-  }
-
-  function shareWalk(id, chatId) {
-    const state = current.current
-    const walk = state.walks.find((item) => item.id === id && item.ownerId === 'me')
-    if (!walk || !allChats.some((chat) => chat.id === chatId)) return false
-    const shared = { ...walk, sharedChatIds: [...new Set([...walk.sharedChatIds, chatId])] }
-    const messages = loadMessages(chatId)
-    const message = {
-      id: newWalkId(), from: 'me', type: 'walk', walkId: id, createdAt: Date.now(),
-      sentAt: new Date().toLocaleTimeString('en-AU', { hour: 'numeric', minute: '2-digit' }),
-    }
-    const next = { ...state, walks: state.walks.map((item) => item.id === id ? shared : item) }
-    try {
-      writeWalkStore(next)
-      if (!saveMessages(chatId, [...messages, message])) {
-        writeWalkStore(state)
-        throw new Error('Could not save the chat')
-      }
-      current.current = next
-      setStore(next)
-      setNotice('')
-      onOpenChat(chatId)
-      return true
-    } catch {
-      setNotice('The route could not be shared. Free up device storage and try again.')
-      return false
-    }
-  }
-
   return <WalkContext.Provider value={{
-    ...store, notice, gps, screenAwake, start, pause, resume, finish, save, discard,
-    deleteWalk, changeVisibility, revokeShares, shareWalk,
+    ...store, notice, gps, screenAwake, start, pause, resume, finish, save, discard, setLiveSharing, setRecording,
+    sharingActive: Boolean(settings.shareLocation && liveSharing),
+    deleteWalk, changeVisibility,
   }}>{children}</WalkContext.Provider>
 }

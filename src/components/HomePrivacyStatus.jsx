@@ -6,7 +6,6 @@ import './HomePrivacyStatus.css'
 // choice is visible straight away and one tap leads back to change it.
 export default function HomePrivacyStatus({ settings }) {
   const messages = []
-  if (settings.shareLocation) messages.push('Friends can see your location while you walk')
   if (settings.suggestToOthers) messages.push("You're suggested to nearby owners")
   if (messages.length === 0) return null
 

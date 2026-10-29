@@ -1,6 +1,6 @@
 import './Avatar.css'
 
-// "Sam & Max" -> "SM"
+// "Sam Taylor" -> "ST"
 function getInitials(name) {
   const words = name.split(/\s+/).filter((word) => /\w/.test(word))
   const first = words[0]?.[0] ?? ''

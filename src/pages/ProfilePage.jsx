@@ -41,7 +41,6 @@ export default function ProfilePage() {
       ) : <ProfileDetails profile={saved} />}
 
       <WalkHistory />
-      <p className="profile-help">Your details, photos and walks are saved on this browser.</p>
     </div>
   )
 }

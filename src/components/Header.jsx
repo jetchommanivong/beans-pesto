@@ -1,11 +1,12 @@
 import { Link, useLocation, useNavigate } from 'react-router'
 import { ArrowLeft, PawPrint } from 'lucide-react'
+import ActiveWalkBanner from './ActiveWalkBanner.jsx'
 import './Header.css'
 import './HeaderBack.css'
 
 // `showBack` is turned on for every screen that has no bottom navigation, so
 // no sub-page can leave someone stranded.
-export default function Header({ showBack = false }) {
+export default function Header({ showBack = false, showWalkIndicator = true }) {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -26,6 +27,7 @@ export default function Header({ showBack = false }) {
         <PawPrint size={22} strokeWidth={2.25} aria-hidden="true" />
         Tail Mates
       </Link>
+      {showWalkIndicator && <ActiveWalkBanner />}
     </header>
   )
 }

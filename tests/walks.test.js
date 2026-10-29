@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import {
   WALK_STORAGE_KEY, acceptPosition, canViewWalk, createWalkDraft, distanceMetres,
   elapsedWalk, finishWalk, formatWalkDistance, formatWalkDuration, readWalkStore,
-  resumeDraft, routeSegments, stopDraft, walkDistance, watchWalkPosition, writeWalkStore,
+  resumeDraft, routeSegments, stopDraft, walkDistance, walkPauseMessage, watchWalkPosition, writeWalkStore,
 } from '../src/data/walkData.js'
 
 const start = 1792300000000
@@ -16,27 +16,26 @@ function storage(initial) {
   return { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) }
 }
 
-test('recording uses fresh precise fixes and rejects poor GPS, stale positions and jitter', () => {
+test('recording accepts GPS without accuracy, speed or movement thresholds', () => {
   const active = { ...createWalkDraft(start), points: [] }
-  const first = acceptPosition(active, position(-27.47, 0), start)
+  const first = acceptPosition(active, position(-27.47, 0))
   assert.ok(first)
   active.points = [first]
-  assert.ok(acceptPosition(active, position(-27.4701, 10), start + 10000))
-  assert.equal(acceptPosition(active, position(-27.4702, 20, 100), start + 20000), null)
-  assert.equal(acceptPosition(active, position(-27.47, 10), start + 10000), null)
-  assert.equal(acceptPosition(active, position(-27.470001, 10), start + 10000), null)
-  assert.equal(acceptPosition(active, position(-27.4701, -1), start + 10000), null)
-  assert.equal(acceptPosition(active, position(-27.4701, 30), start + 10000), null)
-  assert.equal(acceptPosition(active, position(100, 10), start + 10000), null)
+  assert.ok(acceptPosition(active, position(-27.4702, 20, 100)))
+  assert.ok(acceptPosition(active, position(-27.47, 10)))
+  assert.ok(acceptPosition(active, position(-27.470001, 10)))
+  assert.ok(acceptPosition(active, position(-28, 10)))
+  assert.equal(acceptPosition(active, position(-27.4701, -1)), null)
+  assert.equal(acceptPosition(active, position(100, 10)), null)
+  assert.equal(acceptPosition(active, position(-27.47, 0)), null)
 })
 
-test('GPS jumps are ignored and GPS gaps split the displayed route and distance', () => {
+test('GPS gaps do not add automatic route-splitting rules', () => {
   const active = { ...createWalkDraft(start), points: [route[0]] }
-  assert.equal(acceptPosition(active, position(-28, 10), start + 10000), null)
-  const afterGap = acceptPosition(active, position(-28, 120), start + 120000)
-  assert.equal(afterGap.segment, 1)
-  assert.equal(walkDistance([route[0], afterGap]), 0)
-  assert.equal(routeSegments([route[0], afterGap]).length, 2)
+  const afterGap = acceptPosition(active, position(-28, 120))
+  assert.equal(afterGap.segment, 0)
+  assert.ok(walkDistance([route[0], afterGap]) > 0)
+  assert.equal(routeSegments([route[0], afterGap]).length, 1)
 })
 
 test('pausing excludes time and resuming does not draw across the pause', () => {
@@ -53,8 +52,12 @@ test('pausing excludes time and resuming does not draw across the pause', () => 
   assert.equal(finished.endedAt, start + 140000)
 })
 
-test('saving a walk requires a real route and an explicit privacy choice', () => {
-  assert.throws(() => finishWalk({ ...draft(), points: [] }, 'Empty', 'private'), /Record a little more/)
+test('saving and publishing need no minimum route length', () => {
+  for (const points of [[], [route[0]], route.slice(0, 2)]) {
+    for (const visibility of ['private', 'followers']) {
+      assert.equal(finishWalk({ ...draft(), points }, 'Short walk', visibility).visibility, visibility)
+    }
+  }
   assert.throws(() => finishWalk(draft(), 'Walk', 'public'), /Choose who/)
   const walk = finishWalk(stopDraft(draft(), 'review', start + 30000), '  Morning walk  ', 'private')
   assert.equal(walk.title, 'Morning walk')
@@ -72,6 +75,50 @@ test('walk storage recovers an unfinished recording paused without recording clo
   const finished = finishWalk(stopDraft(draft(), 'review', start + 30000), 'Route', 'followers')
   writeWalkStore({ walks: [finished], draft: null }, saved)
   assert.deepEqual(readWalkStore(saved).walks, [finished])
+})
+
+test('sample walks populate fresh and existing stores once, preserving edits and deletions', () => {
+  const fresh = storage()
+  const initial = readWalkStore(fresh)
+  assert.equal(initial.walks.length, 2)
+  const own = initial.walks.find((walk) => walk.ownerId === 'me')
+  const friend = initial.walks.find((walk) => walk.ownerId === 'sam')
+  assert.ok(own.points.length > 1)
+  assert.equal(canViewWalk(friend), false)
+  assert.equal(canViewWalk(friend, { chatId: 'chat-sam', chatMemberIds: ['me', 'sam'] }), true)
+  writeWalkStore({ walks: [friend], draft: null }, fresh)
+  assert.deepEqual(readWalkStore(fresh).walks.map((walk) => walk.id), [friend.id])
+
+  const existing = finishWalk(draft(), 'Existing walk', 'private', start + 30000)
+  const upgraded = readWalkStore(storage({ walks: [existing], draft: null }))
+  assert.equal(upgraded.walks.length, 3)
+  assert.deepEqual(upgraded.walks.find((walk) => walk.id === existing.id), existing)
+  writeWalkStore(upgraded, fresh)
+  assert.equal(readWalkStore(fresh).walks.length, 3)
+})
+
+test('walk choices survive reload and legacy live sharing is removed from walks', () => {
+  for (const recordRoute of [false, true]) {
+    const active = { ...createWalkDraft(start, { recordRoute }), shareLocation: true }
+    const saved = storage({ walks: [], draft: active })
+    const restored = readWalkStore(saved, start + 60000).draft
+    assert.equal(restored.recordRoute, recordRoute)
+    assert.equal(Object.hasOwn(restored, 'shareLocation'), false)
+    assert.equal(restored.phase, 'paused')
+    assert.deepEqual(restored.points, [])
+  }
+  const legacy = draft()
+  delete legacy.recordRoute
+  assert.equal(readWalkStore(storage({ walks: [], draft: legacy })).draft.recordRoute, true)
+})
+
+test('location-related pauses retain their explanation after reload and clear on resume', () => {
+  const blocked = { ...stopDraft(draft(), 'paused', start + 30000), pauseReason: 'location-denied' }
+  const restored = readWalkStore(storage({ walks: [], draft: blocked })).draft
+  assert.match(walkPauseMessage(restored), /Location access is blocked/)
+  assert.equal(walkPauseMessage(resumeDraft(restored, start + 60000)), '')
+  const backgrounded = { ...blocked, pauseReason: 'background' }
+  assert.match(walkPauseMessage(backgrounded), /background/)
 })
 
 test('corrupt storage is preserved and unavailable storage reports failure rather than claiming a save', () => {

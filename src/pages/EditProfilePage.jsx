@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router'
-import { OwnerFields, DogFields, StorageNotice } from '../components/ProfileFields.jsx'
+import { OwnerFields, DogFields } from '../components/ProfileFields.jsx'
 import useProfile from '../hooks/useProfile.js'
 import './ProfilePage.css'
 
@@ -28,7 +28,6 @@ export default function EditProfilePage() {
       <form className="profile-editor" onSubmit={save} onChange={() => setError('')}>
         <OwnerFields />
         <DogFields />
-        <StorageNotice />
         <p className="profile-help" role="status">
           {dirty
             ? 'Unsaved changes. Your draft stays available when you switch pages. Save before closing this app.'

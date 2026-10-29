@@ -28,10 +28,13 @@
   padding-bottom: calc(14px + env(safe-area-inset-bottom));
 }
 
-.app-footer__note {
-  display: flex;
-  align-items: flex-start;
+.app-footer__about {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
+  min-height: 44px;
+  color: var(--color-text-muted);
+  text-underline-offset: 3px;
 }
 
 @media (min-width: 520px) {

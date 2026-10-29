@@ -16,8 +16,8 @@ export default function AccountPrivacyPage() {
       <ul className="privacy__list">
         <PrivacyToggle
           icon={MapPin}
-          title="Share my location on walks"
-          description="Friends can see where you are while a walk is running. Stop it any time."
+          title="Allow live location sharing"
+          description="Allow friends-only live sharing, on or off a walk. Turning this off stops sharing."
           checked={settings.shareLocation}
           onChange={(value) => setSetting('shareLocation', value)}
         />

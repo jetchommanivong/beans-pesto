@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
-import { CircleMarker, GeoJSON, MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet'
+import { CircleMarker, GeoJSON, MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import { Users } from 'lucide-react'
 import L from 'leaflet'
@@ -8,6 +8,7 @@ import 'leaflet/dist/leaflet.css'
 // because the count bubbles are styled in PlacesMap.css to match the app.
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css'
 import { formatDistance } from '../data/brisbaneOpenData.js'
+import { routeSegments } from '../data/walkData.js'
 import './PlacesMap.css'
 
 // One colour per place type, matching the filter chips and the list on MapPage.
@@ -136,8 +137,10 @@ export default function PlacesMap({
   myCheckIn,
   onCheckIn,
   onCheckOut,
+  routePoints = [],
 }) {
-  const startPosition = useMemo(() => [center.lat, center.lon], [center.lat, center.lon])
+  const latest = routePoints.at(-1) ?? center
+  const startPosition = useMemo(() => [latest.lat, latest.lon], [latest.lat, latest.lon])
   const markersById = useRef(new Map())
   const mapRef = useRef(null)
   const clusterRef = useRef(null)
@@ -187,6 +190,9 @@ export default function PlacesMap({
       )}
 
       {/* Where the user is */}
+      {routeSegments(routePoints).filter((segment) => segment.length > 1).map((segment) => (
+        <Polyline key={`${segment[0].segment}-${segment[0].at}`} positions={segment.map((point) => [point.lat, point.lon])} pathOptions={{ color: '#2f6b4f', weight: 5 }} />
+      ))}
       <CircleMarker
         center={startPosition}
         radius={8}
@@ -252,7 +258,7 @@ export default function PlacesMap({
         ))}
       </MarkerClusterGroup>
 
-      <MapView center={center} />
+      <MapView center={latest} />
     </MapContainer>
   )
 }
