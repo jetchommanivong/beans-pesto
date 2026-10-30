@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { Bone, Crosshair, Droplet, Fence, MapPin, PawPrint, Search, TreePine } from 'lucide-react'
 import PlacesMap from '../components/PlacesMap.jsx'
+import { WalkPreview } from './WalkPage.jsx'
+import useWalks from '../hooks/useWalks.js'
 import useCheckIns from '../hooks/useCheckIns.js'
 import useNearbyPlaces from '../hooks/useNearbyPlaces.js'
 import useUserLocation from '../hooks/useUserLocation.js'
@@ -39,12 +41,19 @@ export default function MapPage() {
 }
 
 function MapScreen({ startingFilter, startingPlaceId }) {
+  const { draft } = useWalks()
   const { location, status: locationStatus, isPrecise, requestLocation } = useUserLocation()
+  const walkPosition = draft?.points.at(-1)
+  const mapLocation = walkPosition ?? location
+  const hasLocation = Boolean(walkPosition) || isPrecise
+  // Refresh nearby places roughly every 100 m, rather than on every GPS fix.
+  const nearbyLat = Number(mapLocation.lat.toFixed(3))
+  const nearbyLon = Number(mapLocation.lon.toFixed(3))
   const {
     places: councilPlaces,
     status: dataStatus,
     retry,
-  } = useNearbyPlaces({ lat: location.lat, lon: location.lon, radiusKm: SEARCH_RADIUS_KM })
+  } = useNearbyPlaces({ lat: nearbyLat, lon: nearbyLon, radiusKm: SEARCH_RADIUS_KM })
   const { myCheckIn, checkIn, checkOut, presenceByPlace } = useCheckIns(councilPlaces)
 
   const [activeFilters, setActiveFilters] = useState(() =>
@@ -165,7 +174,8 @@ function MapScreen({ startingFilter, startingPlaceId }) {
 
       <div className="map">
         <PlacesMap
-          center={location}
+          routePoints={draft?.points}
+          center={mapLocation}
           places={visiblePlaces}
           selectedPlace={selectedPlace}
           onSelectPlace={setSelectedId}
@@ -175,6 +185,8 @@ function MapScreen({ startingFilter, startingPlaceId }) {
           onCheckOut={checkOut}
         />
       </div>
+
+      <WalkPreview />
 
       <p className="map-status" aria-live="polite">
         {dataStatus === 'loading' && 'Finding places near you…'}
@@ -189,9 +201,9 @@ function MapScreen({ startingFilter, startingPlaceId }) {
         {dataStatus === 'ready' && (
           <>
             {`${visiblePlaces.length} places within ${SEARCH_RADIUS_KM} km ${
-              isPrecise ? 'of you' : 'of central Brisbane'
+              hasLocation ? 'of you' : 'of central Brisbane'
             }`}
-            {!isPrecise && (
+            {!hasLocation && (
               <button type="button" className="map-status__locate" onClick={requestLocation}>
                 <Crosshair size={14} aria-hidden="true" />
                 {locationStatus === 'locating' ? 'Finding you…' : 'Use my location'}
@@ -232,7 +244,7 @@ function MapScreen({ startingFilter, startingPlaceId }) {
         <a href="https://data.brisbane.qld.gov.au/explore/" target="_blank" rel="noreferrer">
           Brisbane City Council open data
         </a>
-        . Other owners shown are sample data.
+        .
       </p>
     </div>
   )

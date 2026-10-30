@@ -41,7 +41,6 @@ export default function ProfilePage() {
       ) : <ProfileDetails profile={saved} />}
 
       <WalkHistory />
-      <p className="profile-help">Your details, photos and walks are saved on this browser.</p>
       <p className="profile-help"><Link to="/about">About Tail Mates</Link></p>
     </div>
   )

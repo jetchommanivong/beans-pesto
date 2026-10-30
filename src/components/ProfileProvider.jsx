@@ -23,7 +23,7 @@ export default function ProfileProvider({ children }) {
       if (error) return { ok: false, message: error }
       localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(next))
       setSaved(next); setDraft(next); setNotice('')
-      return { ok: true, message: 'Profile saved on this browser.' }
+      return { ok: true, message: 'Profile saved.' }
     } catch {
       return { ok: false, message: 'This browser could not save your profile. Your entries remain available while this app stays open. Please try again.' }
     }

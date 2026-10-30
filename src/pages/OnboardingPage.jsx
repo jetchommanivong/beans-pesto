@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router'
-import { OwnerFields, DogFields, StorageNotice } from '../components/ProfileFields.jsx'
+import { OwnerFields, DogFields } from '../components/ProfileFields.jsx'
 import useProfile from '../hooks/useProfile.js'
 import ProfileDetails from '../components/ProfileDetails.jsx'
 import { normalizeProfile, profileError } from '../data/profileData.js'
@@ -32,7 +32,6 @@ export default function OnboardingPage() {
       {step === 0 && <OwnerFields />}
       {step === 1 && <DogFields />}
       {step === 2 && <ProfileDetails profile={normalizeProfile(draft)} />}
-      <StorageNotice />
       {error && <p role="alert" className="profile-error">{error}</p>}
       <div className="profile-actions">{step > 0 && <button type="button" className="button button--secondary" onClick={() => { setStep(step - 1); setError('') }}>Back</button>}<button type="submit" className="button button--primary">{step === 2 ? 'Save and finish setup' : 'Continue'}</button></div>
     </form>

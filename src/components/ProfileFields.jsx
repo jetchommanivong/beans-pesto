@@ -69,7 +69,3 @@ export function DogFields() {
     <button type="button" className="button button--secondary" onClick={() => setDraft(current => ({ ...current, dogs: [...current.dogs, createDog()] }))}>Add another dog</button>
   </section>
 }
-
-export function StorageNotice() {
-  return <aside className="profile-notice"><strong>Your profile stays on this browser</strong><p>It is not uploaded or shown to other people. Clearing site data may remove it. Profile setup does not request your location or enable sharing.</p></aside>
-}

@@ -1,4 +1,4 @@
-import { MapPin, UserSearch } from 'lucide-react'
+import { UserSearch } from 'lucide-react'
 import usePrivacySettings from '../hooks/usePrivacySettings.js'
 import './AccountPrivacyPage.css'
 
@@ -14,13 +14,6 @@ export default function AccountPrivacyPage() {
       </p>
 
       <ul className="privacy__list">
-        <PrivacyToggle
-          icon={MapPin}
-          title="Share my location on walks"
-          description="Friends can see where you are while a walk is running. Stop it any time."
-          checked={settings.shareLocation}
-          onChange={(value) => setSetting('shareLocation', value)}
-        />
         <PrivacyToggle
           icon={UserSearch}
           title="Suggest me to others"

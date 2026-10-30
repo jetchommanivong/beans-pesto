@@ -59,6 +59,10 @@
   overflow-wrap: anywhere;
 }
 
+.chat__person-name { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.chat__person-name > .chat__title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat__person-name > .dog-names { flex: 0 2 auto; }
+
 .chat__subtitle,
 .chat__empty {
   margin-top: 4px;
@@ -135,6 +139,8 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
+
+.pin--incoming { align-self: flex-start; }
 
 .pin__place {
   display: flex;

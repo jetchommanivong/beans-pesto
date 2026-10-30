@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 import AppLayout from './components/AppLayout.jsx'
 import ProfileProvider from './components/ProfileProvider.jsx'
 import OnboardingPage from './pages/OnboardingPage.jsx'
@@ -11,14 +11,13 @@ import ChatPage from './pages/ChatPage.jsx'
 import ProfilePage from './pages/ProfilePage.jsx'
 import EditProfilePage from './pages/EditProfilePage.jsx'
 import AccountPrivacyPage from './pages/AccountPrivacyPage.jsx'
+import AboutPage from './pages/AboutPage.jsx'
 import LoadingScreen from './pages/LoadingScreen.jsx'
 import UnderConstructionPage from './pages/UnderConstructionPage.jsx'
 import useSocialState from './hooks/useSocialState.js'
 import OwnerProfilePage from './pages/OwnerProfilePage.jsx'
 import WalkProvider from './components/WalkProvider.jsx'
-import WalkPage from './pages/WalkPage.jsx'
 import WalkDetailPage from './pages/WalkDetailPage.jsx'
-import AboutPage from './pages/AboutPage.jsx'
 
 // How long the splash screen shows when the app first opens.
 const LOADING_DURATION_MS = 1200
@@ -48,7 +47,7 @@ export default function App() {
   return (
     <LocationProvider>
       <ProfileProvider>
-      <WalkProvider onOpenChat={social.openChat}>
+      <WalkProvider>
       <Routes>
         {/* Main screens: header + bottom navigation */}
         <Route element={<AppLayout />}>
@@ -63,10 +62,10 @@ export default function App() {
           <Route path="onboarding" element={<OnboardingPage />} />
           <Route path="profile/edit" element={<EditProfilePage />} />
           <Route path="profile/privacy" element={<AccountPrivacyPage />} />
+          <Route path="about" element={<AboutPage />} />
           <Route path="social/chat/:chatId" element={<ChatPage onOpenChat={social.openChat} />} />
           <Route path="social/people/:ownerId" element={<OwnerProfilePage followedIds={social.followedIds} toggleFollow={social.toggleFollow} />} />
-          <Route path="walk" element={<WalkPage />} />
-          <Route path="about" element={<AboutPage />} />
+          <Route path="walk" element={<Navigate to="/map" replace />} />
           <Route path="walks/:walkId" element={<WalkDetailPage followingOwnerIds={social.followedIds} />} />
           {/* Only reached by a mistyped address; nothing in the app links here. */}
           <Route path="*" element={<UnderConstructionPage />} />

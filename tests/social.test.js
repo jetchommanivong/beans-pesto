@@ -6,6 +6,7 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import { createServer } from 'vite'
 import { allChats, chats, followerIds, getOwnerProfile, groupChats, owners } from '../src/data/mockData.js'
 import { getChatSummary, getConversations, loadMessages, saveMessages } from '../src/data/chatMessages.js'
+import { SAMPLE_FRIEND_WALK, SAMPLE_USER_WALK } from '../src/data/sampleWalks.js'
 
 let server
 let SocialPage
@@ -15,8 +16,11 @@ let useSocialState
 let WalkPage
 let WalkDetailPage
 let WalkHistory
+let AccountPrivacyPage
+let ActiveWalkBanner
 let walkContext
 let WalkContext
+let ProfileContext
 let LoadingScreen
 const previousStorage = globalThis.localStorage
 
@@ -27,6 +31,7 @@ before(async () => {
     logLevel: 'error',
   })
   WalkContext = (await server.ssrLoadModule('/src/context/walkContext.js')).WalkContext
+  ProfileContext = (await server.ssrLoadModule('/src/context/profileContext.js')).ProfileContext
   SocialPage = (await server.ssrLoadModule('/src/pages/SocialPage.jsx')).default
   OwnerProfilePage = (await server.ssrLoadModule('/src/pages/OwnerProfilePage.jsx')).default
   ChatPage = (await server.ssrLoadModule('/src/pages/ChatPage.jsx')).default
@@ -34,11 +39,13 @@ before(async () => {
   WalkPage = (await server.ssrLoadModule('/src/pages/WalkPage.jsx')).default
   WalkDetailPage = (await server.ssrLoadModule('/src/pages/WalkDetailPage.jsx')).default
   WalkHistory = (await server.ssrLoadModule('/src/components/WalkHistory.jsx')).default
+  AccountPrivacyPage = (await server.ssrLoadModule('/src/pages/AccountPrivacyPage.jsx')).default
+  ActiveWalkBanner = (await server.ssrLoadModule('/src/components/ActiveWalkBanner.jsx')).default
   LoadingScreen = (await server.ssrLoadModule('/src/pages/LoadingScreen.jsx')).default
 })
 
 beforeEach(() => {
-  walkContext = { walks: [], draft: null, gps: { status: 'idle' }, notice: '', shareWalk: noop }
+  walkContext = { walks: [], draft: null, gps: { status: 'idle' }, notice: '' }
   const data = new Map()
   globalThis.localStorage = {
     getItem: (key) => data.get(key) ?? null,
@@ -61,11 +68,11 @@ const socialProps = (activeTab) => ({
 })
 
 function renderRoute(path, route, component, props) {
-  return renderToStaticMarkup(createElement(WalkContext.Provider, { value: walkContext }, createElement(MemoryRouter, { initialEntries: [path] },
+  return renderToStaticMarkup(createElement(ProfileContext.Provider, { value: { saved: { dogs: [{ name: 'Bailey' }, { name: 'Scout' }] } } }, createElement(WalkContext.Provider, { value: walkContext }, createElement(MemoryRouter, { initialEntries: [path] },
     createElement(Routes, null,
       createElement(Route, { path: route, element: createElement(component, props) }),
     ),
-  )))
+  ))))
 }
 
 test('the startup loading screen renders before the walk provider is mounted', () => {
@@ -102,7 +109,7 @@ test('following offers profile and DM links with anchored suggestions and no wal
   const following = html.match(/<ul class="list" aria-label="People you follow">([\s\S]*?)<\/ul>/)[1]
   assert.ok(following.includes('href="/social/people/sam"'))
   assert.ok(following.includes('href="/social/chat/chat-sam"'))
-  assert.ok(following.includes('Unfollow Sam &amp; Max'))
+  assert.ok(following.includes('Unfollow Sam'))
   assert.ok(following.includes('lucide-send'))
   assert.ok(html.includes('social-suggestions'))
   assert.ok(html.includes('social-page--suggestions'))
@@ -121,6 +128,8 @@ test('every direct chat links back to the right profile, including new conversat
     const html = renderRoute(`/social/chat/chat-${person.id}`, '/social/chat/:chatId', ChatPage, { onOpenChat: noop })
     assert.ok(html.includes(`href="/social/people/${person.id}"`))
     assert.ok(html.includes('View profile'))
+    assert.ok(html.includes(`class="chat__title">${person.name}</h1>`))
+    assert.ok(html.includes(`class="dog-names__text">${person.dogName}</span>`))
     assert.ok(html.includes('aria-label="Send"'))
   }
 })
@@ -291,6 +300,49 @@ test('walk review defaults to private and asks before saving or publishing', () 
   assert.ok(!html.includes('Publish to followers'))
 })
 
+test('route recording remains available without live location sharing', () => {
+  const html = renderRoute('/map', '/map', WalkPage)
+  assert.ok(html.includes('Record route'))
+  assert.ok(!html.includes('Live location'))
+  assert.match(html, /role="switch" aria-checked="false"/)
+  assert.ok(html.includes('Start walk'))
+})
+
+test('legacy live-sharing settings do not restore its controls; pins still work', () => {
+  localStorage.setItem('tailmates.privacy', JSON.stringify({ shareLocation: true, suggestToOthers: true }))
+  const privacy = renderRoute('/profile/privacy', '/profile/privacy', AccountPrivacyPage)
+  assert.ok(privacy.includes('Suggest me to others'))
+  assert.ok(!privacy.includes('live location'))
+  assert.equal((privacy.match(/role="switch"/g) ?? []).length, 1)
+  const header = renderRoute('/', '/', ActiveWalkBanner)
+  assert.ok(header.includes('header-walk'))
+  assert.ok(!header.includes('Live location'))
+  assert.ok(!header.includes('header-live'))
+  const chat = renderRoute('/social/chat/chat-sam', '/social/chat/:chatId', ChatPage, { onOpenChat: noop })
+  assert.ok(chat.includes('Meet-up pin'))
+})
+
+test('a walk without recording shows a timer and finish controls without route-saving options', () => {
+  walkContext.draft = { ...routeFixture, points: [], recordRoute: false, phase: 'paused' }
+  const html = renderRoute('/map', '/map', WalkPage)
+  assert.ok(html.includes('10m 00s'))
+  assert.match(html, /role="switch" aria-checked="false"/)
+  assert.ok(html.includes('Resume'))
+  assert.ok(html.includes('Finish'))
+  assert.ok(!html.includes('Save privately'))
+  assert.ok(html.includes('Discard walk'))
+  assert.ok(!html.includes('Distance'))
+})
+
+test('a location-blocked walk explains the pause and offers walking without a route', () => {
+  walkContext.draft = { ...routeFixture, phase: 'paused', recordRoute: true, pauseReason: 'location-denied' }
+  const html = renderRoute('/', '/', WalkPage)
+  assert.ok(html.includes('Location access is blocked'))
+  assert.ok(html.includes('Continue without route'))
+  assert.ok(html.includes('role="alert"'))
+  assert.ok(html.includes('Resume'))
+})
+
 test('walk history shows both privacy levels to the owner and routes are linked', () => {
   walkContext.walks = [routeFixture, { ...routeFixture, id: 'shared-walk', visibility: 'followers' }]
   const html = renderRoute('/profile', '/profile', WalkHistory)
@@ -298,20 +350,41 @@ test('walk history shows both privacy levels to the owner and routes are linked'
   assert.ok(html.includes('href="/walks/shared-walk"'))
   assert.ok(html.includes('Private'))
   assert.ok(html.includes('Followers'))
-  assert.ok(html.includes('Preview follower view'))
+  assert.ok(!html.includes('Preview follower view'))
+  assert.ok(html.includes('aria-label="Filter walk history"'))
+  assert.equal((html.match(/aria-pressed="true"/g) ?? []).length, 1)
+  assert.ok(html.includes('walk-card--private'))
+  assert.ok(html.includes('Private · Only you'))
+  assert.ok(!html.includes('?view=follower'))
 })
 
-test('private routes are hidden in follower previews, and shared routes have no owner controls', () => {
+test('private routes remain hidden from others, and shared routes have no owner controls', () => {
   walkContext.walks = [routeFixture]
-  const privateHtml = renderRoute('/walks/saved-walk?view=follower', '/walks/:walkId', WalkDetailPage)
+  const ownerHtml = renderRoute('/walks/saved-walk', '/walks/:walkId', WalkDetailPage)
+  assert.ok(ownerHtml.includes('aria-label="Walk visibility"'))
+  assert.ok(!ownerHtml.includes('Share in chat'))
+  assert.ok(!ownerHtml.includes('Back to chat'))
+  assert.ok(!ownerHtml.includes('Walk history'))
+  assert.ok(ownerHtml.includes('Delete walk'))
+  walkContext.walks = [{ ...routeFixture, ownerId: 'sam' }]
+  const privateHtml = renderRoute('/walks/saved-walk', '/walks/:walkId', WalkDetailPage, { followingOwnerIds: ['sam'] })
   assert.ok(privateHtml.includes('Walk unavailable'))
   assert.ok(!privateHtml.includes('Morning dog walk'))
   assert.ok(!privateHtml.includes('walk-map'))
-  walkContext.walks = [{ ...routeFixture, visibility: 'followers' }]
-  const followersHtml = renderRoute('/walks/saved-walk?view=follower', '/walks/:walkId', WalkDetailPage)
+  walkContext.walks = [{ ...routeFixture, ownerId: 'sam', visibility: 'followers' }]
+  const followersHtml = renderRoute('/walks/saved-walk', '/walks/:walkId', WalkDetailPage, { followingOwnerIds: ['sam'] })
   assert.ok(followersHtml.includes('Morning dog walk'))
   assert.ok(!followersHtml.includes('Delete walk'))
   assert.ok(!followersHtml.includes('Who can see this walk?'))
+  assert.ok(!followersHtml.includes('aria-label="Walk visibility"'))
+  assert.ok(!followersHtml.includes('Share in chat'))
+  walkContext.walks = [{ ...routeFixture, ownerId: 'sam', sharedChatIds: ['chat-sam'] }]
+  const sharedHtml = renderRoute('/walks/saved-walk?chat=chat-sam', '/walks/:walkId', WalkDetailPage)
+  assert.ok(sharedHtml.includes('Morning dog walk'))
+  assert.ok(sharedHtml.includes('href="/social/people/sam"'))
+  assert.ok(!sharedHtml.includes('aria-label="Walk visibility"'))
+  assert.ok(!sharedHtml.includes('Delete walk'))
+  assert.ok(!sharedHtml.includes('Share in chat'))
 })
 
 test('shared route messages link to a live walk and lose the route when it is deleted', () => {
@@ -330,4 +403,20 @@ test('shared route messages link to a live walk and lose the route when it is de
   assert.ok(after.includes('This walk is no longer available.'))
   assert.ok(!after.includes('Morning dog walk'))
   assert.ok(!after.includes('href="/walks/saved-walk'))
+})
+
+test('sample walks appear in your history and as an incoming route from Sam', () => {
+  walkContext.walks = [SAMPLE_USER_WALK, SAMPLE_FRIEND_WALK]
+  const history = renderRoute('/profile', '/profile', WalkHistory)
+  assert.ok(history.includes(SAMPLE_USER_WALK.title))
+  assert.ok(!history.includes(SAMPLE_FRIEND_WALK.title))
+  const chat = renderRoute('/social/chat/chat-sam', '/social/chat/:chatId', ChatPage, { onOpenChat: noop })
+  assert.ok(chat.includes('pin--incoming'))
+  assert.ok(chat.includes(SAMPLE_FRIEND_WALK.title))
+  assert.ok(chat.includes(`href="/walks/${SAMPLE_FRIEND_WALK.id}?chat=chat-sam"`))
+  assert.ok(!chat.includes('Share a walk'))
+  const detail = renderRoute(`/walks/${SAMPLE_FRIEND_WALK.id}?chat=chat-sam`, '/walks/:walkId', WalkDetailPage)
+  assert.ok(detail.includes(SAMPLE_FRIEND_WALK.title))
+  assert.ok(!detail.includes('Delete walk'))
+  assert.ok(!detail.includes('Back to chat'))
 })

@@ -5,7 +5,8 @@ import Avatar from '../components/Avatar.jsx'
 import ChatAvatar from '../components/ChatAvatar.jsx'
 import ListItem from '../components/ListItem.jsx'
 import OwnerListItem from '../components/OwnerListItem.jsx'
-import { followerIds, owners } from '../data/mockData.js'
+import DogNames from '../components/DogNames.jsx'
+import { followerIds, getDogNames, owners } from '../data/mockData.js'
 import { getConversations } from '../data/chatMessages.js'
 import './SocialPage.css'
 
@@ -33,7 +34,7 @@ export default function SocialPage({
     (activeTab === 'followers' ? followerIds : followedIds).includes(person.id),
   )
   const filteredPeople = people.filter((person) =>
-    [person.name, person.dog, person.suburb].join(' ').toLocaleLowerCase().includes(search),
+    [person.name, ...getDogNames(person), person.dog, person.suburb].join(' ').toLocaleLowerCase().includes(search),
   )
   const conversations = getConversations(chatIds, {
     filter: chatFilter, query, startedAt: chatStartedAt,
@@ -100,6 +101,7 @@ export default function SocialPage({
                   <ListItem
                     key={chat.id}
                     title={chat.name}
+                    titleDetail={!chat.isGroup && chat.dogNames.length ? <DogNames names={chat.dogNames} /> : undefined}
                     subtitle={chat.isGroup ? `Group · ${chat.subtitle}` : chat.subtitle}
                     meta={chat.time}
                     avatar={<ChatAvatar chat={chat} />}
@@ -160,8 +162,8 @@ export default function SocialPage({
                 <li key={person.id} className="person-card">
                   <Link to={`/social/people/${person.id}`} className="person-card__profile" aria-label={`View ${person.name}'s profile`}>
                     <Avatar name={person.name} tone={person.tone} size={40} />
-                    <p className="person-card__name">{person.name}</p>
-                    <p className="person-card__dog">{person.dog}</p>
+                    <span className="person-card__identity"><span className="person-card__name">{person.name}</span><DogNames names={getDogNames(person)} /></span>
+                    <p className="person-card__breed">{person.dog}</p>
                   </Link>
                   <button
                     type="button"

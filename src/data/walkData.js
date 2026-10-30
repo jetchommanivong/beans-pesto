@@ -1,5 +1,6 @@
+import { SAMPLE_WALKS } from './sampleWalks.js'
+
 export const WALK_STORAGE_KEY = 'tailmates.walks.v1'
-export const MAX_GPS_ACCURACY = 75
 const MAX_POINTS = 20000
 
 export const newWalkId = () => globalThis.crypto?.randomUUID?.() ?? `walk-${Date.now()}-${Math.random().toString(36).slice(2)}`
@@ -20,26 +21,16 @@ export function distanceMetres(a, b) {
   return 6371000 * 2 * Math.atan2(Math.sqrt(h), Math.sqrt(Math.max(0, 1 - h)))
 }
 
-// Ignore poor fixes, stationary jitter and implausible jumps. A missing section
-// is a new segment, rather than an invented straight line across a GPS gap.
-export function acceptPosition(draft, position, now = Date.now()) {
+// Keep valid, fresh GPS points. Pauses and recording toggles start new segments.
+export function acceptPosition(draft, position) {
   const point = {
     lat: position.coords?.latitude, lon: position.coords?.longitude,
     accuracy: position.coords?.accuracy, at: position.timestamp, segment: draft.segment,
   }
-  if (!validPoint(point) || point.accuracy > MAX_GPS_ACCURACY || point.at < draft.activeSince || point.at > now + 5000) return null
+  if (!validPoint(point) || point.at < draft.activeSince) return null
   if (draft.points.length >= MAX_POINTS) return null
   const previous = draft.points.at(-1)
-  if (previous) {
-    const seconds = (point.at - previous.at) / 1000
-    if (seconds <= 0) return null
-    if (seconds > 60 && point.segment === previous.segment) point.segment += 1
-    if (point.segment === previous.segment) {
-      const distance = distanceMetres(previous, point)
-      if (distance < Math.max(4, Math.min(previous.accuracy, point.accuracy) / 4)) return null
-      if (distance / seconds > 8) return null
-    }
-  }
+  if (previous && point.at <= previous.at) return null
   return point
 }
 
@@ -63,21 +54,28 @@ export function elapsedWalk(draft, now = Date.now()) {
   return draft.elapsedMs + (draft.phase === 'recording' ? Math.max(0, now - draft.activeSince) : 0)
 }
 
-export function createWalkDraft(now = Date.now()) {
-  return { id: newWalkId(), ownerId: 'me', startedAt: now, endedAt: null, phase: 'recording', activeSince: now, elapsedMs: 0, segment: 0, points: [] }
+export function createWalkDraft(now = Date.now(), { recordRoute = true } = {}) {
+  return { id: newWalkId(), ownerId: 'me', startedAt: now, endedAt: null, phase: 'recording', activeSince: now, elapsedMs: 0, segment: 0, points: [], recordRoute }
 }
 
 export function stopDraft(draft, phase, now = Date.now()) {
-  return { ...draft, phase, elapsedMs: elapsedWalk(draft, now), activeSince: null, endedAt: phase === 'review' ? now : null }
+  return { ...draft, phase, elapsedMs: elapsedWalk(draft, now), activeSince: null, endedAt: phase === 'review' ? now : null, pauseReason: phase === 'paused' ? 'manual' : null }
 }
 
 export function resumeDraft(draft, now = Date.now()) {
-  return { ...draft, phase: 'recording', activeSince: now, endedAt: null, segment: draft.segment + 1 }
+  return { ...draft, phase: 'recording', activeSince: now, endedAt: null, segment: draft.segment + 1, pauseReason: null }
+}
+
+export function walkPauseMessage(draft) {
+  if (draft?.phase !== 'paused') return ''
+  if (draft.pauseReason === 'location-denied') return 'Location access is blocked. Allow it in your browser, then resume.'
+  if (draft.pauseReason === 'background') return 'Paused because the app went into the background.'
+  if (draft.pauseReason === 'restored') return 'This walk was restored. Resume when you are ready.'
+  return ''
 }
 
 export function finishWalk(draft, title, visibility, now = Date.now()) {
   if (!['private', 'followers'].includes(visibility)) throw new Error('Choose who can see your walk.')
-  if (draft.points.length < 2 || walkDistance(draft.points) < 5) throw new Error('Record a little more of your route before saving a walk.')
   const stopped = draft.phase === 'review' ? draft : stopDraft(draft, 'review', now)
   return {
     id: draft.id, ownerId: 'me', title: title.trim().slice(0, 80) || 'A walk with my dog',
@@ -96,7 +94,7 @@ export function canViewWalk(walk, { viewerId = 'me', followingOwnerIds = [], cha
 export function readWalkStore(storage, now = Date.now()) {
   try {
     const raw = (storage ?? localStorage).getItem(WALK_STORAGE_KEY)
-    if (!raw) return { walks: [], draft: null, notice: '' }
+    if (!raw) return { walks: structuredClone(SAMPLE_WALKS), draft: null, notice: '' }
     const saved = JSON.parse(raw)
     if (!saved || !Array.isArray(saved.walks)) throw new Error('Invalid walk history')
     const walks = saved.walks.filter((walk) => walk && typeof walk.id === 'string' &&
@@ -106,6 +104,9 @@ export function readWalkStore(storage, now = Date.now()) {
       Number.isFinite(walk.startedAt) && Number.isFinite(walk.endedAt) &&
       Number.isFinite(walk.elapsedMs) && walk.elapsedMs >= 0 &&
       Array.isArray(walk.points) && walk.points.length <= MAX_POINTS && walk.points.every(validPoint))
+    if (!saved.sampleWalksAdded) {
+      walks.push(...structuredClone(SAMPLE_WALKS).filter((sample) => !walks.some((walk) => walk.id === sample.id)))
+    }
     let draft = saved.draft
     if (draft && (typeof draft.id !== 'string' || !['recording', 'paused', 'review'].includes(draft.phase) ||
       !Number.isFinite(draft.startedAt) || !Number.isFinite(draft.elapsedMs) || draft.elapsedMs < 0 ||
@@ -113,9 +114,14 @@ export function readWalkStore(storage, now = Date.now()) {
       !Array.isArray(draft.points) || draft.points.length > MAX_POINTS || !draft.points.every(validPoint) ||
       (draft.phase === 'recording' && !Number.isFinite(draft.activeSince)) ||
       (draft.phase === 'review' && !Number.isFinite(draft.endedAt)))) draft = null
+    if (draft) {
+      draft = { ...draft, recordRoute: draft.recordRoute !== false }
+      delete draft.shareLocation // Remove the legacy sharing preference.
+    }
     if (draft?.phase === 'recording') {
       // Only count time up to the last saved fix; never count time while closed.
       draft = stopDraft(draft, 'paused', Math.min(now, draft.points.at(-1)?.at ?? draft.activeSince))
+      draft.pauseReason = 'restored'
     }
     return { walks, draft: draft ?? null, notice: '' }
   } catch {
@@ -124,7 +130,7 @@ export function readWalkStore(storage, now = Date.now()) {
 }
 
 export function writeWalkStore(store, storage) {
-  (storage ?? localStorage).setItem(WALK_STORAGE_KEY, JSON.stringify({ walks: store.walks, draft: store.draft }))
+  (storage ?? localStorage).setItem(WALK_STORAGE_KEY, JSON.stringify({ walks: store.walks, draft: store.draft, sampleWalksAdded: true }))
 }
 
 export function watchWalkPosition(geolocation, onPosition, onError) {

@@ -1,0 +1,3 @@
+﻿.dog-names { display: inline-flex; align-items: center; gap: 4px; min-width: 0; max-width: 100%; color: var(--color-text-muted); font-family: var(--font-body); font-size: .75rem; font-weight: 400; vertical-align: middle; }
+.dog-names > svg { flex: none; }
+.dog-names__text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
