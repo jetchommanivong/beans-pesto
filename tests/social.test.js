@@ -17,6 +17,7 @@ let WalkPage
 let WalkDetailPage
 let WalkHistory
 let AccountPrivacyPage
+let HomePrivacyStatus
 let ActiveWalkBanner
 let walkContext
 let WalkContext
@@ -40,6 +41,7 @@ before(async () => {
   WalkDetailPage = (await server.ssrLoadModule('/src/pages/WalkDetailPage.jsx')).default
   WalkHistory = (await server.ssrLoadModule('/src/components/WalkHistory.jsx')).default
   AccountPrivacyPage = (await server.ssrLoadModule('/src/pages/AccountPrivacyPage.jsx')).default
+  HomePrivacyStatus = (await server.ssrLoadModule('/src/components/HomePrivacyStatus.jsx')).default
   ActiveWalkBanner = (await server.ssrLoadModule('/src/components/ActiveWalkBanner.jsx')).default
   LoadingScreen = (await server.ssrLoadModule('/src/pages/LoadingScreen.jsx')).default
 })
@@ -308,12 +310,23 @@ test('route recording remains available without live location sharing', () => {
   assert.ok(html.includes('Start walk'))
 })
 
-test('legacy live-sharing settings do not restore its controls; pins still work', () => {
+test('mock location sharing adds a privacy switch and Home reminder; walk controls and pins stay the same', () => {
   localStorage.setItem('tailmates.privacy', JSON.stringify({ shareLocation: true, suggestToOthers: true }))
   const privacy = renderRoute('/profile/privacy', '/profile/privacy', AccountPrivacyPage)
   assert.ok(privacy.includes('Suggest me to others'))
+  assert.ok(privacy.includes('Share my location on walks'))
+  assert.ok(privacy.includes('Friends can see where you are while a walk is running. Stop it any time.'))
+  assert.match(privacy, /aria-checked="true" aria-label="Share my location on walks"/)
   assert.ok(!privacy.includes('live location'))
-  assert.equal((privacy.match(/role="switch"/g) ?? []).length, 1)
+  assert.equal((privacy.match(/role="switch"/g) ?? []).length, 2)
+  const reminder = renderRoute('/', '/', HomePrivacyStatus, { settings: { shareLocation: true, suggestToOthers: false } })
+  assert.ok(reminder.includes('Friends can see your location while you walk'))
+  assert.ok(reminder.includes('Change in privacy'))
+  assert.ok(reminder.includes('href="/profile/privacy"'))
+  assert.equal(renderRoute('/', '/', HomePrivacyStatus, { settings: { shareLocation: false, suggestToOthers: false } }), '')
+  localStorage.setItem('tailmates.privacy', JSON.stringify({ shareLocation: false, suggestToOthers: true }))
+  const disabled = renderRoute('/profile/privacy', '/profile/privacy', AccountPrivacyPage)
+  assert.match(disabled, /aria-checked="false" aria-label="Share my location on walks"/)
   const header = renderRoute('/', '/', ActiveWalkBanner)
   assert.ok(header.includes('header-walk'))
   assert.ok(!header.includes('Live location'))

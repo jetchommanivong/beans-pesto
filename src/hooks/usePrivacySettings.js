@@ -2,15 +2,16 @@ import { useEffect, useState } from 'react'
 
 const STORAGE_KEY = 'tailmates.privacy'
 
-// Privacy belongs to the owner's account, not to a dog. Suggestions start off.
+// Privacy belongs to the owner's account, not to a dog. Both choices start off.
 export const DEFAULT_PRIVACY = {
+  shareLocation: false, // mock preference; shows a reminder on Home without broadcasting GPS
   suggestToOthers: false, // opt in to appear in other owners' "suggested walkers"
 }
 
 function readStored() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}')
-    return { suggestToOthers: saved?.suggestToOthers === true }
+    return { shareLocation: saved?.shareLocation === true, suggestToOthers: saved?.suggestToOthers === true }
   } catch {
     // Storage can be blocked (private browsing); fall back to the safe defaults.
     return DEFAULT_PRIVACY
