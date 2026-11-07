@@ -41,15 +41,15 @@ export default function AboutPage() {
           Tail Mates helps Brisbane dog owners plan better walks and meet other owners nearby. The
           map shows off-leash dog parks, parks and drinking fountains from Brisbane City Council
           open data. Owners can set their dog&apos;s size and temperament, chat, and agree a
-          meet-up with a pin. Privacy comes first: location sharing and suggestions to other owners
-          start Off, and the meet-up pin replaces live tracking.
+          meet-up with a pin. Privacy comes first: suggestions to other owners start Off, and the meet-up pin
+          replaces live tracking, so the app never tracks where you are.
         </p>
       </section>
 
       <section className="about-section" aria-labelledby="about-team">
         <h2 id="about-team">Team</h2>
         <p>
-          DECO1800 Design Computing Studio I, team Beans (Pesto?): Jet Chommanivong, Misri Patel,
+          DECO1800 Design Computing Studio I, team Beans Pesto: Jet Chommanivong, Misri Patel,
           Vairavan Sundararajan, William Mahoney and Xiangyu Ji.
         </p>
       </section>
